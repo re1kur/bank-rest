@@ -1,6 +1,7 @@
 package com.example.bankcards.controller;
 
 import com.example.bankcards.core.exception.UserAlreadyExistsException;
+import com.example.bankcards.core.exception.UserNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -48,6 +49,15 @@ public class AdviceController {
         Map<String, Object> response = getSimpleResponseMap(exception.getMessage(), status);
 
         log.info("ADVICE USER CONFLICT: [{}]", response);
+        return ResponseEntity.status(status).body(response);
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleUserNotFoundException(UserNotFoundException exception) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        Map<String, Object> response = getSimpleResponseMap(exception.getMessage(), status);
+
+        log.info("ADVICE USER NOT FOUND: [{}]", response);
         return ResponseEntity.status(status).body(response);
     }
 }

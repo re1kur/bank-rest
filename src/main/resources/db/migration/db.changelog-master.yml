@@ -1,3 +1,5 @@
 databaseChangeLog:
   - include:
       file: db/migration/db.changelog-users.sql
+  - include:
+      file: db/migration/db.changelog-cards.sql

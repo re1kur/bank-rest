@@ -1,8 +1,11 @@
 package com.example.bankcards.entity;
 
+import com.example.bankcards.core.dto.user.RoleEnum;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +15,8 @@ import java.util.UUID;
 @Entity
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -24,5 +29,5 @@ public class User {
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private List<String> roles = new ArrayList<>();
+    private List<RoleEnum> roles = new ArrayList<>();
 }
