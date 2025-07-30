@@ -1,9 +1,3 @@
---Номер карты (зашифрован, отображается маской: **** **** **** 1234)
---Владелец
---Срок действия
---Статус: Активна, Заблокирована, Истек срок
---Баланс
-
 --liquibase formatted sql
 
 --changeset re1kur:1
@@ -11,10 +5,10 @@ CREATE TABLE IF NOT EXISTS cards
 (
     id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
-    number VARBINARY(256) NOT NULL,
+    number BYTEA NOT NULL,
     last_numbers CHAR(4) NOT NULL,
     expiration_date DATE NOT NULL,
-    status VARCHAR(16) NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'blocked', 'expired'))
+    status VARCHAR(16) NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'blocked', 'expired')),
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
@@ -43,7 +37,7 @@ CREATE TABLE IF NOT EXISTS transactions
     sender_card_id UUID NOT NULL,
     receiver_card_id UUID NOT NULL,
     amount NUMERIC(12, 2) NOT NULL CHECK (amount > 0),
-    status VARCHAR(16) NOT NULL DEFAULT 'processing' CHECK (status IN ('processing', 'failed', 'completed'))
+    status VARCHAR(16) NOT NULL DEFAULT 'processing' CHECK (status IN ('processing', 'failed', 'completed')),
     issue_timestamp TIMESTAMP NOT NULL DEFAULT now(),
     processed_timestamp TIMESTAMP,
     FOREIGN KEY (sender_card_id) REFERENCES cards(id),
