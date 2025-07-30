@@ -26,7 +26,7 @@ public class UsersController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getUser(
+    public ResponseEntity<?> readUser(
             @PathVariable(name = "id") UUID userId
     ) {
         UserDto responseBody = service.read(userId);
@@ -39,6 +39,14 @@ public class UsersController {
             @RequestBody @Valid UserUpdatePayload payload
     ) {
         service.update(userId, payload);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteUser(
+            @PathVariable(name = "id") UUID userId
+    ) {
+        service.delete(userId);
         return ResponseEntity.noContent().build();
     }
 }

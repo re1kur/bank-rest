@@ -12,4 +12,6 @@ public interface UserService {
     UserDto read(UUID userId);
 
     void update(UUID userId, UserUpdatePayload payload);
+
+    void delete(UUID userId);
 }

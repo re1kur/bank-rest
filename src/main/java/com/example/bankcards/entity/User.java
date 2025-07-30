@@ -29,5 +29,6 @@ public class User {
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
+    @Enumerated(EnumType.STRING)
     private List<RoleEnum> roles = new ArrayList<>();
 }

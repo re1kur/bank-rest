@@ -48,6 +48,8 @@ public class UsersControllerTest {
                         post(URI).contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(payload)))
                 .andExpect(status().isOk());
+
+        verify(service, times(1)).create(payload);
     }
 
     @Test
@@ -58,6 +60,8 @@ public class UsersControllerTest {
                         post(URI).contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(payload)))
                 .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(service);
     }
 
     @Test
@@ -68,6 +72,8 @@ public class UsersControllerTest {
                         post(URI).contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(payload)))
                 .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(service);
     }
 
     @Test
@@ -80,10 +86,12 @@ public class UsersControllerTest {
                         post(URI).contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(payload)))
                 .andExpect(status().isConflict());
+
+        verify(service, times(1)).create(payload);
     }
 
     @Test
-    void get__ReturnsOkWithUserDto() throws Exception {
+    void read__ReturnsOkWithUserDto() throws Exception {
         UUID userId = UUID.randomUUID();
         UserDto expected = UserDto.builder().username("username").roles(List.of(RoleEnum.USER)).build();
 
@@ -92,16 +100,21 @@ public class UsersControllerTest {
         mvc.perform(get(URI + "/%s".formatted(userId)))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(expected)));
+
+
+        verify(service, times(1)).read(userId);
     }
 
     @Test
-    void get__UserNotFound__ReturnsBadRequest() throws Exception {
+    void read__UserNotFound__ReturnsBadRequest() throws Exception {
         UUID userId = UUID.randomUUID();
 
         when(service.read(userId)).thenThrow(UserNotFoundException.class);
 
         mvc.perform(get(URI + "/%s".formatted(userId)))
                 .andExpect(status().isBadRequest());
+
+        verify(service, times(1)).read(userId);
     }
 
     @Test
@@ -115,6 +128,8 @@ public class UsersControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(payload)))
                 .andExpect(status().isNoContent());
+
+        verify(service, times(1)).update(userId, payload);
     }
 
     @Test
@@ -126,6 +141,8 @@ public class UsersControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(payload)))
                 .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(service);
     }
 
     @Test
@@ -137,6 +154,8 @@ public class UsersControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(payload)))
                 .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(service);
     }
 
     @Test
@@ -150,6 +169,8 @@ public class UsersControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(payload)))
                 .andExpect(status().isBadRequest());
+
+        verify(service, times(1)).update(userId, payload);
     }
 
     @Test
@@ -163,5 +184,31 @@ public class UsersControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(payload)))
                 .andExpect(status().isConflict());
+
+        verify(service, times(1)).update(userId, payload);
+    }
+
+    @Test
+    void delete__ReturnsNoContent() throws Exception {
+        UUID userId = UUID.randomUUID();
+
+        doNothing().when(service).delete(userId);
+
+        mvc.perform(delete(URI + "/%s".formatted(userId)))
+                .andExpect(status().isNoContent());
+
+        verify(service, times(1)).delete(userId);
+    }
+
+    @Test
+    void delete__UserNotFound__ReturnsBadRequest() throws Exception {
+        UUID userId = UUID.randomUUID();
+
+        doThrow(UserNotFoundException.class).when(service).delete(userId);
+
+        mvc.perform(delete(URI + "/%s".formatted(userId)))
+                .andExpect(status().isBadRequest());
+
+        verify(service, times(1)).delete(userId);
     }
 }

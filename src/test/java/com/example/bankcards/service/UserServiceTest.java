@@ -226,4 +226,30 @@ public class UserServiceTest {
         verifyNoInteractions(mapper);
         verifyNoMoreInteractions(repo);
     }
+
+    @Test
+    void delete__DoesNotThrowException() {
+        UUID userId = UUID.randomUUID();
+        User expected = User.builder().id(userId).build();
+
+        when(repo.findById(userId)).thenReturn(Optional.of(User.builder().id(userId).build()));
+        doNothing().when(repo).delete(User.builder().id(userId).build());
+
+        assertDoesNotThrow(() -> service.delete(userId));
+
+        verify(repo, times(1)).findById(userId);
+        verify(repo, times(1)).delete(expected);
+    }
+
+    @Test
+    void delete__UserNotFound__ThrowsException() {
+        UUID userId = UUID.randomUUID();
+
+        when(repo.findById(userId)).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () -> service.delete(userId));
+
+        verify(repo, times(1)).findById(userId);
+        verifyNoMoreInteractions(repo);
+    }
 }

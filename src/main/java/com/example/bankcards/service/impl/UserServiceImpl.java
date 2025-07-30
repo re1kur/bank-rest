@@ -63,6 +63,19 @@ public class UserServiceImpl implements UserService {
         log.info("USER UPDATED: [{}]", payload);
     }
 
+    @Override
+    @Transactional
+    public void delete(UUID userId) {
+        log.info("DELETE USER REQUEST: [{}]", userId);
+
+        User found = repo.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User [%s] was not found.".formatted(userId)));
+
+        repo.delete(found);
+
+        log.info("USER DELETED: [{}]", userId);
+    }
+
     private void checkConflict(User found, UserUpdatePayload payload) {
         String username = payload.username();
 
