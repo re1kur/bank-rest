@@ -1,6 +1,5 @@
 package com.example.bankcards.entity;
 
-import com.example.bankcards.core.dto.user.RoleEnum;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,8 +26,8 @@ public class User {
     private String password;
 
     @JoinTable(name = "user_roles",
-            joinColumns = @JoinColumn(name = "id"),
+            joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
-    @Enumerated(EnumType.STRING)
-    private List<RoleEnum> roles = new ArrayList<>();
+    @ManyToMany(fetch = FetchType.EAGER)
+    private List<Role> roles = new ArrayList<>();
 }

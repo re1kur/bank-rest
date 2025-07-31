@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Table(name = "cards")
@@ -21,16 +21,20 @@ public class Card {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id")
     private User user;
 
-    private Byte[] number;
+    private String number;
 
-    private String lastNumbers;
+    private String last4;
 
-    private LocalDateTime expirationDate;
+    private LocalDate expirationDate;
 
     @Column(columnDefinition = "DEFAULT 'active'", insertable = false)
     private CardStatus status;
 
+    @JoinColumn(name = "id")
+    @OneToOne(fetch = FetchType.LAZY)
     private CardInformation information;
 }

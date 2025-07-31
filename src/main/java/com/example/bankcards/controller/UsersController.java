@@ -1,11 +1,14 @@
 package com.example.bankcards.controller;
 
+import com.example.bankcards.core.dto.PageDto;
 import com.example.bankcards.core.dto.user.UserDto;
 import com.example.bankcards.core.dto.user.UserPayload;
 import com.example.bankcards.core.dto.user.UserUpdatePayload;
 import com.example.bankcards.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,7 +25,7 @@ public class UsersController {
             @RequestBody @Valid UserPayload payload
     ) {
         service.create(payload);
-        return ResponseEntity.ok(Void.class);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{id}")
@@ -48,5 +51,16 @@ public class UsersController {
     ) {
         service.delete(userId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/list")
+    public ResponseEntity<?> getList(
+            @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
+            @RequestParam(name = "size", required = false, defaultValue = "5") Integer size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        PageDto<UserDto> responseBody = service.readAll(pageable);
+
+        return ResponseEntity.ok(responseBody);
     }
 }

@@ -5,8 +5,8 @@ CREATE TABLE IF NOT EXISTS cards
 (
     id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
-    number BYTEA NOT NULL,
-    last_numbers CHAR(4) NOT NULL,
+    number TEXT NOT NULL,
+    last4 CHAR(4) NOT NULL,
     expiration_date DATE NOT NULL,
     status VARCHAR(16) NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'blocked', 'expired')),
     FOREIGN KEY (user_id) REFERENCES users(id)
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS transactions
 CREATE INDEX IF NOT EXISTS card_status_idx ON cards(status);
 
 --changeset re1kur:6
-CREATE INDEX IF NOT EXISTS card_last_numbers_idx on cards(last_numbers);
+CREATE INDEX IF NOT EXISTS card_last4_idx on cards(last4);
 
 --changeset re1kur:7
 CREATE INDEX IF NOT EXISTS card_user_id_idx on cards(user_id);

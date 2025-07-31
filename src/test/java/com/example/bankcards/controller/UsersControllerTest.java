@@ -1,6 +1,6 @@
 package com.example.bankcards.controller;
 
-import com.example.bankcards.core.dto.user.RoleEnum;
+import com.example.bankcards.core.dto.PageDto;
 import com.example.bankcards.core.dto.user.UserDto;
 import com.example.bankcards.core.dto.user.UserPayload;
 import com.example.bankcards.core.dto.user.UserUpdatePayload;
@@ -12,6 +12,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -93,9 +95,9 @@ public class UsersControllerTest {
     @Test
     void read__ReturnsOkWithUserDto() throws Exception {
         UUID userId = UUID.randomUUID();
-        UserDto expected = UserDto.builder().username("username").roles(List.of(RoleEnum.USER)).build();
+        UserDto expected = UserDto.builder().username("username").roles(List.of("USER")).build();
 
-        when(service.read(userId)).thenReturn(UserDto.builder().username("username").roles(List.of(RoleEnum.USER)).build());
+        when(service.read(userId)).thenReturn(UserDto.builder().username("username").roles(List.of("USER")).build());
 
         mvc.perform(get(URI + "/%s".formatted(userId)))
                 .andExpect(status().isOk())
@@ -120,9 +122,9 @@ public class UsersControllerTest {
     @Test
     void update__ReturnsNoContent() throws Exception {
         UUID userId = UUID.randomUUID();
-        UserUpdatePayload payload = new UserUpdatePayload("username", List.of(RoleEnum.USER, RoleEnum.ADMIN));
+        UserUpdatePayload payload = new UserUpdatePayload("username", List.of(1, 2));
 
-        doNothing().when(service).update(userId, new UserUpdatePayload("username", List.of(RoleEnum.USER, RoleEnum.ADMIN)));
+        doNothing().when(service).update(userId, new UserUpdatePayload("username", List.of(1, 2)));
 
         mvc.perform(put(URI + "/%s".formatted(userId))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -135,7 +137,7 @@ public class UsersControllerTest {
     @Test
     void update__BlankUsername__ReturnsBadRequest() throws Exception {
         UUID userId = UUID.randomUUID();
-        UserUpdatePayload payload = new UserUpdatePayload("", List.of(RoleEnum.USER, RoleEnum.ADMIN));
+        UserUpdatePayload payload = new UserUpdatePayload("", List.of(1, 2));
 
         mvc.perform(put(URI + "/%s".formatted(userId))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -161,9 +163,10 @@ public class UsersControllerTest {
     @Test
     void update__UserNotFound__ReturnsBadRequest() throws Exception {
         UUID userId = UUID.randomUUID();
-        UserUpdatePayload payload = new UserUpdatePayload("username", List.of(RoleEnum.USER, RoleEnum.ADMIN));
+        UserUpdatePayload payload = new UserUpdatePayload("username", List.of(1, 2));
 
-        doThrow(UserNotFoundException.class).when(service).update(userId, new UserUpdatePayload("username", List.of(RoleEnum.USER, RoleEnum.ADMIN)));
+        doThrow(UserNotFoundException.class).when(service).update(userId, new UserUpdatePayload("username",
+                List.of(1, 2)));
 
         mvc.perform(put(URI + "/%s".formatted(userId))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -176,9 +179,10 @@ public class UsersControllerTest {
     @Test
     void update__UsernameIsOccupied__ReturnsConflict() throws Exception {
         UUID userId = UUID.randomUUID();
-        UserUpdatePayload payload = new UserUpdatePayload("username", List.of(RoleEnum.USER, RoleEnum.ADMIN));
+        UserUpdatePayload payload = new UserUpdatePayload("username", List.of(1, 2));
 
-        doThrow(UserAlreadyExistsException.class).when(service).update(userId, new UserUpdatePayload("username", List.of(RoleEnum.USER, RoleEnum.ADMIN)));
+        doThrow(UserAlreadyExistsException.class).when(service).update(userId, new UserUpdatePayload("username",
+                List.of(1, 2)));
 
         mvc.perform(put(URI + "/%s".formatted(userId))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -210,5 +214,26 @@ public class UsersControllerTest {
                 .andExpect(status().isBadRequest());
 
         verify(service, times(1)).delete(userId);
+    }
+
+    @Test
+    void readList__ReturnsListAndOk() throws Exception {
+        Integer page = 0;
+        Integer size = 5;
+        PageDto<UserDto> expected = new PageDto<>(List.of(UserDto.builder().username("username1").build(),
+                UserDto.builder().username("username2").build()), 0, 5, 1, false, false);
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        when(service.readAll(PageRequest.of(page, size))).thenReturn(new PageDto<>(List.of(UserDto.builder().username("username1").build(),
+                UserDto.builder().username("username2").build()), 0, 5, 1, false, false));
+
+        mvc.perform(get(URI + "/list")
+                        .param("page", String.valueOf(page))
+                        .param("size", String.valueOf(size)))
+                .andExpect(status().isOk())
+                .andExpect(content().json(mapper.writeValueAsString(expected)));
+
+        verify(service, times(1)).readAll(pageable);
     }
 }

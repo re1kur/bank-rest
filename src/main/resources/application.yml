@@ -1,9 +1,15 @@
+#file: noinspection undefined
 spring:
   application:
     name: bank-rest
 
 server:
   port: 8080
+
+vault:
+  key:
+    api:
+      path: my-encryption-key
 
 ##
 ## application.yml — главный конфигурационный файл Spring Boot.

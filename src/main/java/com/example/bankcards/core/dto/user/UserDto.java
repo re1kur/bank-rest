@@ -9,6 +9,6 @@ import java.util.UUID;
 public record UserDto (
         UUID id,
         String username,
-        List<RoleEnum> roles
+        List<String> roles
 ) {
 }

@@ -15,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 import static org.mockito.Mockito.*;
@@ -37,7 +38,7 @@ public class CardsControllerTest {
 
     @Test
     void create__ReturnsOk() throws Exception {
-        CardPayload payload = new CardPayload(UUID.randomUUID(), "1234123141231231", "visa");
+        CardPayload payload = new CardPayload(UUID.randomUUID(), "1234123141231231", LocalDate.now().plusDays(30), "visa");
 
         doNothing().when(service).create(payload);
 
@@ -51,7 +52,7 @@ public class CardsControllerTest {
 
     @Test
     void create__EmptyNumber__ReturnsBadRequest() throws Exception {
-        CardPayload payload = new CardPayload(UUID.randomUUID(), "", "visa");
+        CardPayload payload = new CardPayload(UUID.randomUUID(), "", LocalDate.now().plusDays(30), "visa");
 
         doNothing().when(service).create(payload);
 
@@ -65,7 +66,21 @@ public class CardsControllerTest {
 
     @Test
     void create__EmptyUserId__ReturnsBadRequest() throws Exception {
-        CardPayload payload = new CardPayload(null, "1234123141231231", "visa");
+        CardPayload payload = new CardPayload(null, "1234123141231231", LocalDate.now().plusDays(30), "visa");
+
+        doNothing().when(service).create(payload);
+
+        mvc.perform(post(URI)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(payload)))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(service);
+    }
+
+    @Test
+    void create__PastExpirationDate__ReturnsBadRequest() throws Exception {
+        CardPayload payload = new CardPayload(null, "1234123141231231", LocalDate.now().minusDays(30), "visa");
 
         doNothing().when(service).create(payload);
 
@@ -79,7 +94,7 @@ public class CardsControllerTest {
 
     @Test
     void create__CardNumberIsOccupied__ReturnsConflict() throws Exception {
-        CardPayload payload = new CardPayload(UUID.randomUUID(), "1234123141231231", "visa");
+        CardPayload payload = new CardPayload(UUID.randomUUID(), "1234123141231231", LocalDate.now().plusDays(30), "visa");
 
         doThrow(CardAlreadyExistsException.class).when(service).create(payload);
 
@@ -120,7 +135,7 @@ public class CardsControllerTest {
     @Test
     void update__ReturnsNoContent() throws Exception {
         UUID cardId = UUID.randomUUID();
-        CardUpdatePayload payload = new CardUpdatePayload(CardStatus.active);
+        CardUpdatePayload payload = new CardUpdatePayload(CardStatus.active, LocalDate.now().plusDays(30));
 
         doNothing().when(service).update(cardId, payload);
 
@@ -135,7 +150,7 @@ public class CardsControllerTest {
     @Test
     void update__CardNotFound__ReturnsBadRequest() throws Exception {
         UUID cardId = UUID.randomUUID();
-        CardUpdatePayload payload = new CardUpdatePayload(CardStatus.active);
+        CardUpdatePayload payload = new CardUpdatePayload(CardStatus.active, LocalDate.now().plusDays(30));
 
         doThrow(CardNotFoundException.class).when(service).update(cardId, payload);
 
@@ -150,7 +165,20 @@ public class CardsControllerTest {
     @Test
     void update__StatusIsNull__ReturnsBadRequest() throws Exception {
         UUID cardId = UUID.randomUUID();
-        CardUpdatePayload payload = new CardUpdatePayload(null);
+        CardUpdatePayload payload = new CardUpdatePayload(null, LocalDate.now().plusDays(30));
+
+        mvc.perform(put(URI + "/%s".formatted(cardId))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(payload)))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(service);
+    }
+
+    @Test
+    void update__PastDate__ReturnsBadRequest() throws Exception {
+        UUID cardId = UUID.randomUUID();
+        CardUpdatePayload payload = new CardUpdatePayload(CardStatus.active, LocalDate.now().minusDays(30));
 
         mvc.perform(put(URI + "/%s".formatted(cardId))
                         .contentType(MediaType.APPLICATION_JSON)

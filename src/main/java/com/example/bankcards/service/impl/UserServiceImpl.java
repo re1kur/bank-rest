@@ -1,5 +1,6 @@
 package com.example.bankcards.service.impl;
 
+import com.example.bankcards.core.dto.PageDto;
 import com.example.bankcards.core.dto.user.UserDto;
 import com.example.bankcards.core.dto.user.UserPayload;
 import com.example.bankcards.core.dto.user.UserUpdatePayload;
@@ -11,6 +12,7 @@ import com.example.bankcards.repository.UserRepository;
 import com.example.bankcards.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -74,6 +76,17 @@ public class UserServiceImpl implements UserService {
         repo.delete(found);
 
         log.info("USER DELETED: [{}]", userId);
+    }
+
+    @Override
+    public User get(UUID userId) {
+        return repo.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User [%s] was not found.".formatted(userId)));
+    }
+
+    @Override
+    public PageDto<UserDto> readAll(Pageable pageable) {
+        return mapper.readPage(repo.findAll(pageable));
     }
 
     private void checkConflict(User found, UserUpdatePayload payload) {

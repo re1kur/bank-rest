@@ -11,4 +11,10 @@ public class SecurityConfiguration {
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
+//    @Bean
+//    public VaultTemplate vaultTemplate() {
+//        VaultEndpoint endpoint = new VaultEndpoint();
+//        return new VaultTemplate();
+//    }
 }

@@ -12,6 +12,6 @@ public record UserUpdatePayload(
         String username,
 
         @NotEmpty
-        List<RoleEnum> roles
+        List<Integer> roleIds
 ) {
 }

@@ -6,9 +6,11 @@ import com.example.bankcards.core.dto.card.CardUpdatePayload;
 import com.example.bankcards.core.exception.CardAlreadyExistsException;
 import com.example.bankcards.core.exception.CardNotFoundException;
 import com.example.bankcards.entity.Card;
+import com.example.bankcards.entity.User;
 import com.example.bankcards.mapper.CardMapper;
 import com.example.bankcards.repository.CardRepository;
 import com.example.bankcards.service.CardService;
+import com.example.bankcards.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,7 @@ import java.util.UUID;
 public class CardServiceImpl implements CardService {
     private final CardRepository repo;
     private final CardMapper mapper;
+    private final UserService userService;
 
     @Override
     @Transactional
@@ -31,7 +34,9 @@ public class CardServiceImpl implements CardService {
         if (repo.existsByNumber(payload.number()))
             throw new CardAlreadyExistsException("Card [%s] already exists.");
 
-        Card mapped = mapper.create(payload);
+        User user = userService.get(payload.userId());
+
+        Card mapped = mapper.create(payload, user);
 
         Card saved = repo.save(mapped);
 

@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Table(name = "card_information")
@@ -20,10 +20,10 @@ public class CardInformation {
     private UUID id;
 
     @MapsId
-    @JoinColumn
+    @OneToOne(mappedBy = "information")
     private Card card;
 
     private String brand;
 
-    private LocalDateTime issueDate;
+    private LocalDate issueDate;
 }
