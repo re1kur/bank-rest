@@ -1,5 +1,6 @@
 package com.example.bankcards.mapper;
 
+import com.example.bankcards.core.dto.PageDto;
 import com.example.bankcards.core.dto.card.CardDto;
 import com.example.bankcards.core.dto.card.CardPayload;
 import com.example.bankcards.core.dto.card.CardStatus;
@@ -8,13 +9,19 @@ import com.example.bankcards.entity.Card;
 import com.example.bankcards.entity.User;
 import com.example.bankcards.mapper.impl.CardMapperImpl;
 import com.example.bankcards.util.EncryptUtil;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -33,12 +40,14 @@ class CardMapperTest {
         UUID userId = UUID.randomUUID();
         User user = User.builder().id(userId).build();
         LocalDate date = LocalDate.now().plusDays(30);
+        String hash = DigestUtils.sha256Hex("1234123141231231");
 
         CardPayload payload = new CardPayload(userId, "1234123141231231",
                 date, "visa");
         Card expected = Card.builder()
                 .user(user)
                 .number("encryptedNumber")
+                .numberHash(hash)
                 .expirationDate(date)
                 .last4("1231").build();
 
@@ -49,6 +58,7 @@ class CardMapperTest {
         assertEquals(expected.getUser(), result.getUser());
         assertEquals(expected.getNumber(), result.getNumber());
         assertEquals(expected.getLast4(), result.getLast4());
+        assertEquals(expected.getNumberHash(), result.getNumberHash());
         assertEquals(expected.getExpirationDate(), result.getExpirationDate());
     }
 
@@ -107,5 +117,41 @@ class CardMapperTest {
 
         assertEquals(expected.getStatus(), result.getStatus());
         assertEquals(expected.getExpirationDate(), result.getExpirationDate());
+    }
+
+    @Test
+    void readPage__ShouldMapListEntitiesToPageDto() {
+        int page = 0;
+        int size = 5;
+        Pageable pageable = PageRequest.of(page, size);
+
+        UUID userId1 = UUID.randomUUID();
+        UUID userId2 = UUID.randomUUID();
+
+        UUID cardId1 = UUID.randomUUID();
+        UUID cardId2 = UUID.randomUUID();
+
+        LocalDate date1 = LocalDate.now().plusDays(30);
+        LocalDate date2 = LocalDate.now().plusDays(30);
+
+        List<CardDto> expectedDtos = List.of(
+                CardDto.builder().id(cardId1).last4("1234").expirationDate(date1).status("active").userId(userId1).build(),
+                CardDto.builder().id(cardId2).last4("1234").expirationDate(date2).status("active").userId(userId2).build()
+        );
+
+        PageDto<CardDto> expected = new PageDto<>(expectedDtos, 0, 5, 1, false, false);
+
+        User user1 = User.builder().id(userId1).build();
+        User user2 = User.builder().id(userId2).build();
+
+        Card card1 = Card.builder().id(cardId1).user(user1).last4("1234").status(CardStatus.active).expirationDate(date1).build();
+        Card card2 = Card.builder().id(cardId2).user(user2).last4("1234").status(CardStatus.active).expirationDate(date2).build();
+
+        List<Card> cards = List.of(card1, card2);
+        Page<Card> pageCards = new PageImpl<>(cards, pageable, 2);
+
+        PageDto<CardDto> result = mapper.readPage(pageCards);
+
+        assertEquals(expected, result);
     }
 }

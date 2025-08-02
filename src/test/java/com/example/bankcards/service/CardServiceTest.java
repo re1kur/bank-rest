@@ -1,5 +1,6 @@
 package com.example.bankcards.service;
 
+import com.example.bankcards.core.dto.PageDto;
 import com.example.bankcards.core.dto.card.CardDto;
 import com.example.bankcards.core.dto.card.CardPayload;
 import com.example.bankcards.core.dto.card.CardStatus;
@@ -12,13 +13,19 @@ import com.example.bankcards.entity.User;
 import com.example.bankcards.mapper.CardMapper;
 import com.example.bankcards.repository.CardRepository;
 import com.example.bankcards.service.impl.CardServiceImpl;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -48,10 +55,10 @@ class CardServiceTest {
                 .id(userId)
                 .build();
         User user = User.builder().id(userId).build();
+        String hash = DigestUtils.sha256Hex("1234123141231231");
 
-        when(repo.existsByNumber("1234123141231231")).thenReturn(false);
+        when(repo.existsByNumberHash(hash)).thenReturn(false);
         when(userService.get(userId)).thenReturn(User.builder().id(userId).build());
-
         when(mapper.create(new CardPayload(userId, "1234123141231231", LocalDate.now().plusDays(30), "visa"), User.builder().id(userId).build()))
                 .thenReturn(Card.builder()
                         .id(userId)
@@ -63,7 +70,7 @@ class CardServiceTest {
 
         assertDoesNotThrow(() -> service.create(payload));
 
-        verify(repo, times(1)).existsByNumber(payload.number());
+        verify(repo, times(1)).existsByNumberHash(payload.number());
         verify(userService, times(1)).get(userId);
         verify(mapper, times(1)).create(payload, user);
         verify(repo, times(1)).save(expected);
@@ -74,11 +81,13 @@ class CardServiceTest {
         UUID userId = UUID.randomUUID();
         CardPayload payload = new CardPayload(userId, "1234123141231231", LocalDate.now().plusDays(30), "visa");
 
-        when(repo.existsByNumber("1234123141231231")).thenReturn(true);
+        String hash = DigestUtils.sha256Hex("1234123141231231");
+
+        when(repo.existsByNumberHash(hash)).thenReturn(true);
 
         assertThrows(CardAlreadyExistsException.class, () -> service.create(payload));
 
-        verify(repo, times(1)).existsByNumber(payload.number());
+        verify(repo, times(1)).existsByNumberHash(payload.number());
         verifyNoInteractions(mapper, userService);
         verifyNoMoreInteractions(repo);
     }
@@ -87,13 +96,14 @@ class CardServiceTest {
     void create__UserNotFound__ThrowsException() {
         UUID userId = UUID.randomUUID();
         CardPayload payload = new CardPayload(userId, "1234123141231231", LocalDate.now().plusDays(30), "visa");
+        String hash = DigestUtils.sha256Hex("1234123141231231");
 
-        when(repo.existsByNumber("1234123141231231")).thenReturn(false);
+        when(repo.existsByNumberHash(hash)).thenReturn(false);
         when(userService.get(userId)).thenThrow(UserNotFoundException.class);
 
         assertThrows(UserNotFoundException.class, () -> service.create(payload));
 
-        verify(repo, times(1)).existsByNumber(payload.number());
+        verify(repo, times(1)).existsByNumberHash(payload.number());
         verify(userService, times(1)).get(userId);
         verifyNoInteractions(mapper);
         verifyNoMoreInteractions(repo);
@@ -185,5 +195,37 @@ class CardServiceTest {
 
         verify(repo, times(1)).findById(cardId);
         verifyNoMoreInteractions(repo);
+    }
+
+    @Test
+    void readAll__ReturnsPageDto() {
+        int page = 0;
+        int size = 5;
+
+        UUID userId1 = UUID.randomUUID();
+        UUID userId2 = UUID.randomUUID();
+
+        PageDto<CardDto> expected = new PageDto<>(List.of(CardDto.builder().userId(userId1).build(),
+                CardDto.builder().userId(userId2).build()), 0, 5, 1, false, false);
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Card> expectedFound = new PageImpl<>(List.of(Card.builder().user(User.builder().id(userId1).build()).build(),
+                Card.builder().user(User.builder().id(userId2).build()).build()), pageable, 1);
+
+        when(repo.findAll(pageable))
+                .thenReturn(new PageImpl<>(List.of(Card.builder().user(User.builder().id(userId1).build()).build(),
+                        Card.builder().user(User.builder().id(userId2).build()).build()), pageable, 1));
+
+        when(mapper.readPage(new PageImpl<>(List.of(Card.builder().user(User.builder().id(userId1).build()).build(),
+                        Card.builder().user(User.builder().id(userId2).build()).build()), pageable, 1)))
+                .thenReturn(new PageDto<>(List.of(CardDto.builder().userId(userId1).build(),
+                        CardDto.builder().userId(userId2).build()), 0, 5, 1, false, false));
+
+        PageDto<CardDto> result = assertDoesNotThrow(() -> service.readAll(pageable));
+
+        assertEquals(expected, result);
+
+        verify(repo, times(1)).findAll(pageable);
+        verify(mapper, times(1)).readPage(expectedFound);
     }
 }

@@ -1,5 +1,6 @@
 package com.example.bankcards.service.impl;
 
+import com.example.bankcards.core.dto.PageDto;
 import com.example.bankcards.core.dto.card.CardDto;
 import com.example.bankcards.core.dto.card.CardPayload;
 import com.example.bankcards.core.dto.card.CardUpdatePayload;
@@ -13,6 +14,8 @@ import com.example.bankcards.service.CardService;
 import com.example.bankcards.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,8 +34,7 @@ public class CardServiceImpl implements CardService {
     public void create(CardPayload payload) {
         log.info("CREATE CARD REQUEST: [user: {}]", payload.userId());
 
-        if (repo.existsByNumber(payload.number()))
-            throw new CardAlreadyExistsException("Card [%s] already exists.");
+        checkConflicts(payload);
 
         User user = userService.get(payload.userId());
 
@@ -41,6 +43,14 @@ public class CardServiceImpl implements CardService {
         Card saved = repo.save(mapped);
 
         log.info("CARD CREATED: [{}]", saved.getId());
+    }
+
+    private void checkConflicts(CardPayload payload) {
+        String number = payload.number();
+        String numberHash = DigestUtils.sha256Hex(number);
+
+        if (repo.existsByNumberHash(numberHash))
+            throw new CardAlreadyExistsException("Card [%s] already exists.".formatted(number));
     }
 
     @Override
@@ -76,5 +86,10 @@ public class CardServiceImpl implements CardService {
         repo.delete(found);
 
         log.info("DELETED CARD: [{}]", cardId);
+    }
+
+    @Override
+    public PageDto<CardDto> readAll(Pageable pageable) {
+        return mapper.readPage(repo.findAll(pageable));
     }
 }

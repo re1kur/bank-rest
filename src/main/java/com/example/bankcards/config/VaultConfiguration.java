@@ -9,7 +9,7 @@ import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.core.VaultTemplate;
 
 @Configuration
-public class VaultConfig {
+public class VaultConfiguration {
     @Value("${spring.vault.token}")
     private String token;
 
@@ -20,13 +20,14 @@ public class VaultConfig {
 
     @Bean
     public VaultEndpoint vaultEndpoint() {
-        return new VaultEndpoint();
+        VaultEndpoint endpoint = new VaultEndpoint();
+        endpoint.setScheme("http");
+        return endpoint;
     }
 
     @Bean
     public ClientAuthentication clientAuthentication() {
         return new TokenAuthentication(token);
     }
-
 }
 

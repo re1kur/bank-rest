@@ -26,4 +26,11 @@ services:
       VAULT_DEV_LISTEN_ADDRESS: 0.0.0.0:8200
     cap_add:
       - IPC_LOCK
-    command: vault server -dev
+    command:
+      sh -c '
+        vault server -dev &
+        export VAULT_ADDR="http://127.0.0.1:8200"
+        export VAULT_TOKEN="root"
+        vault secrets enable transit
+        tail -f /dev/null
+      '

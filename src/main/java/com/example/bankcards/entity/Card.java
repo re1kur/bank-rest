@@ -27,11 +27,14 @@ public class Card {
 
     private String number;
 
+    private String numberHash;
+
     private String last4;
 
     private LocalDate expirationDate;
 
     @Column(columnDefinition = "DEFAULT 'active'", insertable = false)
+    @Enumerated(EnumType.STRING)
     private CardStatus status;
 
     @JoinColumn(name = "id")

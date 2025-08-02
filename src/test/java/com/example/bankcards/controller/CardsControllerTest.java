@@ -1,5 +1,6 @@
 package com.example.bankcards.controller;
 
+import com.example.bankcards.core.dto.PageDto;
 import com.example.bankcards.core.dto.card.CardDto;
 import com.example.bankcards.core.dto.card.CardPayload;
 import com.example.bankcards.core.dto.card.CardStatus;
@@ -11,11 +12,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.Mockito.*;
@@ -210,5 +214,28 @@ public class CardsControllerTest {
                 .andExpect(status().isBadRequest());
 
         verify(service, times(1)).delete(cardId);
+    }
+
+    @Test
+    void readList__ReturnsPageDtoAndOk() throws Exception {
+        Integer page = 0;
+        Integer size = 5;
+        UUID userId1 = UUID.randomUUID();
+        UUID userId2 = UUID.randomUUID();
+        PageDto<CardDto> expected = new PageDto<>(List.of(CardDto.builder().userId(userId1).build(),
+                CardDto.builder().userId(userId2).build()), 0, 5, 1, false, false);
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        when(service.readAll(PageRequest.of(page, size))).thenReturn(new PageDto<>(List.of(CardDto.builder().userId(userId1).build(),
+                CardDto.builder().userId(userId2).build()), 0, 5, 1, false, false));
+
+        mvc.perform(get(URI + "/list")
+                        .param("page", String.valueOf(page))
+                        .param("size", String.valueOf(size)))
+                .andExpect(status().isOk())
+                .andExpect(content().json(mapper.writeValueAsString(expected)));
+
+        verify(service, times(1)).readAll(pageable);
     }
 }

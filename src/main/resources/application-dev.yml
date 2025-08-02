@@ -1,4 +1,8 @@
 spring:
+  datasource:
+    username: developer
+    password: developer
+    url: jdbc:postgresql://localhost:5432/developer
   docker:
     compose:
       enabled: true

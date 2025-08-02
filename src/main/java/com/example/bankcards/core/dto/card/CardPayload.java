@@ -15,7 +15,7 @@ public record CardPayload(
         @Pattern(regexp = "^\\d{16}$")
         String number,
         @Future
-        LocalDate date,
+        LocalDate expirationDate,
         String brand
 ) {
 }

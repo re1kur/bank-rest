@@ -5,7 +5,8 @@ CREATE TABLE IF NOT EXISTS cards
 (
     id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
-    number TEXT NOT NULL,
+    number TEXT NOT NULL UNIQUE,
+    number_hash char(64) NOT NULL UNIQUE,
     last4 CHAR(4) NOT NULL,
     expiration_date DATE NOT NULL,
     status VARCHAR(16) NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'blocked', 'expired')),
