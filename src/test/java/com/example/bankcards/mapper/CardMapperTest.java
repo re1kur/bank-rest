@@ -8,7 +8,7 @@ import com.example.bankcards.core.dto.card.CardUpdatePayload;
 import com.example.bankcards.entity.Card;
 import com.example.bankcards.entity.User;
 import com.example.bankcards.mapper.impl.CardMapperImpl;
-import com.example.bankcards.util.EncryptUtil;
+import com.example.bankcards.util.EncryptUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,7 +33,7 @@ class CardMapperTest {
     private CardMapperImpl mapper;
 
     @Mock
-    private EncryptUtil encryptUtil;
+    private EncryptUtils encryptUtils;
 
     @Test
     void create__ShouldMapPayloadToCardEntity() {
@@ -51,7 +51,7 @@ class CardMapperTest {
                 .expirationDate(date)
                 .last4("1231").build();
 
-        when(encryptUtil.encrypt("1234123141231231")).thenReturn("encryptedNumber");
+        when(encryptUtils.encrypt("1234123141231231")).thenReturn("encryptedNumber");
 
         Card result = mapper.create(payload, user);
 

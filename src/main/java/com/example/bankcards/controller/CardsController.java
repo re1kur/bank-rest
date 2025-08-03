@@ -53,8 +53,8 @@ public class CardsController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/list")
-    public ResponseEntity<?> getList(
+    @GetMapping
+    public ResponseEntity<?> getRoles(
             @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
             @RequestParam(name = "size", required = false, defaultValue = "5") Integer size
     ) {

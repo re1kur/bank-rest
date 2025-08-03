@@ -8,7 +8,7 @@ import com.example.bankcards.core.dto.card.CardUpdatePayload;
 import com.example.bankcards.entity.Card;
 import com.example.bankcards.entity.User;
 import com.example.bankcards.mapper.CardMapper;
-import com.example.bankcards.util.EncryptUtil;
+import com.example.bankcards.util.EncryptUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -20,13 +20,13 @@ import java.util.List;
 @Mapper
 @RequiredArgsConstructor
 public class CardMapperImpl implements CardMapper {
-    private final EncryptUtil encryptUtil;
+    private final EncryptUtils encryptUtils;
 
     @Override
     public Card create(CardPayload payload, User user) {
         String number = payload.number();
         String last4 = number.substring(number.length() - 4);
-        String encryptedNumber = encryptUtil.encrypt(number);
+        String encryptedNumber = encryptUtils.encrypt(number);
         String numberHash = DigestUtils.sha256Hex(number);
 
         return Card.builder()

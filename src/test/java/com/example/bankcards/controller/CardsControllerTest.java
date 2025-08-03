@@ -230,7 +230,7 @@ public class CardsControllerTest {
         when(service.readAll(PageRequest.of(page, size))).thenReturn(new PageDto<>(List.of(CardDto.builder().userId(userId1).build(),
                 CardDto.builder().userId(userId2).build()), 0, 5, 1, false, false));
 
-        mvc.perform(get(URI + "/list")
+        mvc.perform(get(URI)
                         .param("page", String.valueOf(page))
                         .param("size", String.valueOf(size)))
                 .andExpect(status().isOk())

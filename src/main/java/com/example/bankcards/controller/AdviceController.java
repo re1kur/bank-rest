@@ -1,9 +1,6 @@
 package com.example.bankcards.controller;
 
-import com.example.bankcards.core.exception.CardAlreadyExistsException;
-import com.example.bankcards.core.exception.CardNotFoundException;
-import com.example.bankcards.core.exception.UserAlreadyExistsException;
-import com.example.bankcards.core.exception.UserNotFoundException;
+import com.example.bankcards.core.exception.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -61,6 +58,24 @@ public class AdviceController {
         log.info("ADVICE USER NOT FOUND: [{}]", response);
         return ResponseEntity.status(status).body(response);
     }
+    @ExceptionHandler(CardNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleCardNotFoundException(CardNotFoundException exception) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        Map<String, Object> response = getSimpleResponseMap(exception.getMessage(), status);
+
+        log.info("ADVICE CARD NOT FOUND: [{}]", response);
+        return ResponseEntity.status(status).body(response);
+    }
+
+    @ExceptionHandler(RoleNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleRoleNotFoundException(RoleNotFoundException exception) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        Map<String, Object> response = getSimpleResponseMap(exception.getMessage(), status);
+
+        log.info("ADVICE ROLE NOT FOUND: [{}]", response);
+        return ResponseEntity.status(status).body(response);
+    }
+
     @ExceptionHandler(CardAlreadyExistsException.class)
     public ResponseEntity<Map<String, Object>> handleCardAlreadyExistsException(CardAlreadyExistsException exception) {
         HttpStatus status = HttpStatus.CONFLICT;
@@ -70,12 +85,12 @@ public class AdviceController {
         return ResponseEntity.status(status).body(response);
     }
 
-    @ExceptionHandler(CardNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleCardNotFoundException(CardNotFoundException exception) {
-        HttpStatus status = HttpStatus.BAD_REQUEST;
+    @ExceptionHandler(RoleAlreadyExistsException.class)
+    public ResponseEntity<Map<String, Object>> handleRoleAlreadyExistsException(RoleAlreadyExistsException exception) {
+        HttpStatus status = HttpStatus.CONFLICT;
         Map<String, Object> response = getSimpleResponseMap(exception.getMessage(), status);
 
-        log.info("ADVICE CARD NOT FOUND: [{}]", response);
+        log.info("ADVICE ROLE CONFLICT: [{}]", response);
         return ResponseEntity.status(status).body(response);
     }
 }

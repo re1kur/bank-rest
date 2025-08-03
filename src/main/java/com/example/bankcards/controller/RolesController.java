@@ -1,10 +1,10 @@
 package com.example.bankcards.controller;
 
 import com.example.bankcards.core.dto.PageDto;
-import com.example.bankcards.core.dto.user.UserDto;
-import com.example.bankcards.core.dto.user.UserPayload;
-import com.example.bankcards.core.dto.user.UserUpdatePayload;
-import com.example.bankcards.service.UserService;
+import com.example.bankcards.core.dto.role.RoleDto;
+import com.example.bankcards.core.dto.role.RolePayload;
+import com.example.bankcards.core.dto.role.RoleUpdatePayload;
+import com.example.bankcards.service.RoleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -12,44 +12,42 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.UUID;
-
 @RestController
-@RequestMapping("/api/v1/users")
+@RequestMapping("/api/v1/roles")
 @RequiredArgsConstructor
-public class UsersController {
-    private final UserService service;
+public class RolesController {
+    private final RoleService service;
 
     @PostMapping
-    public ResponseEntity<?> createUser(
-            @RequestBody @Valid UserPayload payload
+    public ResponseEntity<?> createRole(
+            @RequestBody @Valid RolePayload payload
     ) {
         service.create(payload);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> readUser(
-            @PathVariable(name = "id") UUID userId
+    public ResponseEntity<?> readRole(
+            @PathVariable(name = "id") Integer roleId
     ) {
-        UserDto responseBody = service.read(userId);
+        RoleDto responseBody = service.read(roleId);
         return ResponseEntity.ok(responseBody);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(
-            @PathVariable(name = "id") UUID userId,
-            @RequestBody @Valid UserUpdatePayload payload
-    ) {
-        service.update(userId, payload);
+    public ResponseEntity<?> updateRole(
+            @PathVariable(name = "id") Integer roleId,
+            @RequestBody @Valid RoleUpdatePayload payload
+            ) {
+        service.update(roleId, payload);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteUser(
-            @PathVariable(name = "id") UUID userId
+    public ResponseEntity<?> deleteRole(
+            @PathVariable(name = "id") Integer roleId
     ) {
-        service.delete(userId);
+        service.delete(roleId);
         return ResponseEntity.noContent().build();
     }
 
@@ -59,7 +57,7 @@ public class UsersController {
             @RequestParam(name = "size", required = false, defaultValue = "5") Integer size
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        PageDto<UserDto> responseBody = service.readAll(pageable);
+        PageDto<RoleDto> responseBody = service.readAll(pageable);
 
         return ResponseEntity.ok(responseBody);
     }

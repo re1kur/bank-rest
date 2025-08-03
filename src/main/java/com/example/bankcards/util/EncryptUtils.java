@@ -8,7 +8,7 @@ import org.springframework.vault.core.VaultTemplate;
 
 @Component
 @RequiredArgsConstructor
-public class EncryptUtil {
+public class EncryptUtils {
     private final VaultTemplate vaultTemplate;
 
     @Value("${vault.key.api.path}")

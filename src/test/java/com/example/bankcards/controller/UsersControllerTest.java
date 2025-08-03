@@ -228,7 +228,7 @@ public class UsersControllerTest {
         when(service.readAll(PageRequest.of(page, size))).thenReturn(new PageDto<>(List.of(UserDto.builder().username("username1").build(),
                 UserDto.builder().username("username2").build()), 0, 5, 1, false, false));
 
-        mvc.perform(get(URI + "/list")
+        mvc.perform(get(URI)
                         .param("page", String.valueOf(page))
                         .param("size", String.valueOf(size)))
                 .andExpect(status().isOk())
