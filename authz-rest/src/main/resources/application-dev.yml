@@ -1,0 +1,31 @@
+#file: noinspection undefined
+spring:
+  docker:
+    compose:
+      enabled: true
+      file:
+        - authz-rest/docker-compose.yml
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:8081/api/v1/auth/.well-known.jwks
+
+
+
+vault:
+  port: 8200
+  host: localhost
+  uri: http://localhost:8200
+  token: root
+  jwt-sign-key:
+    path: jwt-signer
+
+jwt:
+  ttl:
+    access: 15
+    refresh: 4
+  keySize: 2048
+  privateKeyPath: /tmp/private.key
+  publicKeyPath: /tmp/public.key
+  kidPath: /tmp/kid.txt
