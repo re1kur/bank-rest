@@ -10,8 +10,13 @@ vault:
   key:
     api:
       path: my-encryption-key
-
-##
+mq:
+  exchange:
+    transaction: transaction.exchange
+  routing-key:
+    transaction: transaction.created
+  queue:
+    transaction: transaction.created.queue
 ## application.yml — главный конфигурационный файл Spring Boot.
 #
 #Что нужно сделать:

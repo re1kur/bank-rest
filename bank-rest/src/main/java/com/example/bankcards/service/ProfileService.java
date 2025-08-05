@@ -19,5 +19,5 @@ public interface ProfileService {
 
     void blockCard(String subject, UUID cardId);
 
-    PageDto<TransactionDto> readTransactions(JwtAuthenticationToken bearerToken, Pageable pageable);
+    PageDto<TransactionDto> readTransactions(String userId, Pageable pageable);
 }

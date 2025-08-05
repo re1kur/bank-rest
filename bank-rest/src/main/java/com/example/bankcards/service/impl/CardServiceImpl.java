@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -32,13 +33,13 @@ public class CardServiceImpl implements CardService {
 
     @Override
     @Transactional
-    public void create(CardPayload payload) {
+    public void create(CardPayload payload, String bearer) {
         UUID userId = payload.userId();
         log.info("CREATE CARD REQUEST: [user: {}]", userId);
 
         checkConflicts(payload);
 
-        userClient.checkIfExists(payload.userId());
+        userClient.checkIfExists(payload.userId(), bearer);
 
         Card mapped = mapper.create(payload);
 
@@ -95,15 +96,23 @@ public class CardServiceImpl implements CardService {
     @Override
     public PageDto<CardDto> readAll(Pageable pageable, CardFilter filter) {
         BigDecimal amount = filter.amount();
-        Boolean amountDesc = filter.amountDesc();
+        Boolean amountDesc = Boolean.TRUE.equals(filter.amountDesc());
         LocalDateTime expirationDate = filter.expirationDate();
-        Boolean dateDesc = filter.dateDesc();
-        CardStatus status = filter.status();
+        Boolean dateDesc = Boolean.TRUE.equals(filter.dateDesc());
+        String statusName = filter.status() != null ? filter.status().name() : null;
         UUID userId = filter.userId();
 
-
-        return mapper.readPage(repo.findAll(pageable, amount, amountDesc, expirationDate, dateDesc, status.name(), userId));
+        return mapper.readPage(repo.findAll(
+                pageable,
+                amount,
+                amountDesc,
+                expirationDate,
+                dateDesc,
+                statusName,
+                userId
+        ));
     }
+
 
     @Override
     public Card getById(UUID cardId) {
@@ -137,6 +146,11 @@ public class CardServiceImpl implements CardService {
         repo.save(found);
 
         log.info("CARD [{}] BLOCKED BY user [{}]", cardId, userId);
+    }
+
+    @Override
+    public List<Card> getByUserId(UUID userId) {
+        return repo.findAllByUserId(userId);
     }
 
     private void checkBlockConflicts(Card found) {

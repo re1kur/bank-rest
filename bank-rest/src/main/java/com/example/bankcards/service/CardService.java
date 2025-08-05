@@ -9,10 +9,11 @@ import com.example.bankcards.core.other.CardFilter;
 import com.example.bankcards.entity.Card;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface CardService {
-    void create(CardPayload payload);
+    void create(CardPayload payload, String bearer);
 
     CardDto read(UUID cardId);
 
@@ -27,4 +28,6 @@ public interface CardService {
     CardFullDto readFull(UUID cardId);
 
     void blockCard(UUID userId, UUID cardId);
+
+    List<Card> getByUserId(UUID userId);
 }

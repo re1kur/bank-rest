@@ -27,7 +27,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void create(UserPayload payload) {
+    public UUID create(UserPayload payload) {
         String username = payload.username();
         log.info("CREATE USER REQUEST: [{}]", username);
 
@@ -38,7 +38,9 @@ public class UserServiceImpl implements UserService {
 
         User saved = repo.save(mapped);
 
-        log.info("USER CREATED: [{}]", saved.getId());
+        UUID id = saved.getId();
+        log.info("USER CREATED: [{}]", id);
+        return id;
     }
 
     @Override

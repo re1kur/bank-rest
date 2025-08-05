@@ -27,6 +27,10 @@ public class SecurityConfiguration {
                 .sessionManagement(
                         session -> session
                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> jwt
+                                .jwkSetUri(jwkSetUri)
+                                .jwtAuthenticationConverter(jwtAuthenticationConverter())))
                 .authorizeHttpRequests(req -> req
                         .requestMatchers(
                                 "/swagger-ui.html",
@@ -42,10 +46,10 @@ public class SecurityConfiguration {
                                 "/api/v1/balances",
                                 "/api/v1/transactions/**",
                                 "/api/v1/transactions"
-                        ).hasRole("ADMIN")
+                        ).hasAuthority("ADMIN")
                         .requestMatchers(
                                 "/api/v1/profile/**",
-                                "/api/v1/profile").hasRole("USER")
+                                "/api/v1/profile").hasAuthority("USER")
                         .anyRequest().authenticated()
                 );
 
@@ -57,6 +61,7 @@ public class SecurityConfiguration {
         JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
         JwtGrantedAuthoritiesConverter authoritiesConverter = new JwtGrantedAuthoritiesConverter();
         authoritiesConverter.setAuthorityPrefix("");
+        authoritiesConverter.setAuthoritiesClaimName("roles");
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(authoritiesConverter);
         return jwtAuthenticationConverter;
     }

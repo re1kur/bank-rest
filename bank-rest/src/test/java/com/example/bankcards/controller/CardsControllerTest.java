@@ -47,21 +47,21 @@ public class CardsControllerTest {
     void create__ReturnsOk() throws Exception {
         CardPayload payload = new CardPayload(UUID.randomUUID(), "1234123141231231", LocalDate.now().plusDays(30), "visa");
 
-        doNothing().when(service).create(payload);
+        doNothing().when(service).create(payload, jwt.getSubject());
 
         mvc.perform(post(URI)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(payload)))
                 .andExpect(status().isOk());
 
-        verify(service, times(1)).create(payload);
+        verify(service, times(1)).create(payload, jwt.getSubject());
     }
 
     @Test
     void create__EmptyNumber__ReturnsBadRequest() throws Exception {
         CardPayload payload = new CardPayload(UUID.randomUUID(), "", LocalDate.now().plusDays(30), "visa");
 
-        doNothing().when(service).create(payload);
+        doNothing().when(service).create(payload, jwt.getSubject());
 
         mvc.perform(post(URI)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -75,7 +75,7 @@ public class CardsControllerTest {
     void create__EmptyUserId__ReturnsBadRequest() throws Exception {
         CardPayload payload = new CardPayload(null, "1234123141231231", LocalDate.now().plusDays(30), "visa");
 
-        doNothing().when(service).create(payload);
+        doNothing().when(service).create(payload, jwt.getSubject());
 
         mvc.perform(post(URI)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -89,7 +89,7 @@ public class CardsControllerTest {
     void create__PastExpirationDate__ReturnsBadRequest() throws Exception {
         CardPayload payload = new CardPayload(null, "1234123141231231", LocalDate.now().minusDays(30), "visa");
 
-        doNothing().when(service).create(payload);
+        doNothing().when(service).create(payload, jwt.getSubject());
 
         mvc.perform(post(URI)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -103,14 +103,14 @@ public class CardsControllerTest {
     void create__CardNumberIsOccupied__ReturnsConflict() throws Exception {
         CardPayload payload = new CardPayload(UUID.randomUUID(), "1234123141231231", LocalDate.now().plusDays(30), "visa");
 
-        doThrow(CardAlreadyExistsException.class).when(service).create(payload);
+        doThrow(CardAlreadyExistsException.class).when(service).create(payload, jwt.getSubject());
 
         mvc.perform(post(URI)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(payload)))
                 .andExpect(status().isConflict());
 
-        verify(service, times(1)).create(payload);
+        verify(service, times(1)).create(payload, jwt.getSubject());
     }
 
     @Test

@@ -95,4 +95,13 @@ public class AdviceController {
         log.info("ADVICE USER FORBIDDEN: [{}]", response);
         return ResponseEntity.status(status).body(response);
     }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<Map<String, Object>> handleIllegalStateException(IllegalStateException exception) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        Map<String, Object> response = getSimpleResponseMap(exception.getMessage(), status);
+
+        log.info("ADVICE ILLEGAL STATE: [{}]", response);
+        return ResponseEntity.status(status).body(response);
+    }
 }

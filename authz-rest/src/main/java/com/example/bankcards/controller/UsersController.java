@@ -24,7 +24,7 @@ public class UsersController {
     public ResponseEntity<?> createUser(
             @RequestBody @Valid UserPayload payload
     ) {
-        service.create(payload);
+        UUID responseId = service.create(payload);
         return ResponseEntity.ok().build();
     }
 

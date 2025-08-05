@@ -20,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UserClientTest {
@@ -43,7 +42,7 @@ class UserClientTest {
 
         doThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST)).when(restTemplate).exchange(eq(url), eq(HttpMethod.GET), isNull(), eq(Void.class));
 
-        assertThrows(UserNotFoundException.class, () -> client.checkIfExists(userId));
+        assertThrows(UserNotFoundException.class, () -> client.checkIfExists(userId, bearer));
     }
 
 }

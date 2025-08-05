@@ -3,7 +3,7 @@
 --changeset re1kur:1
 CREATE TABLE IF NOT EXISTS users
 (
-    id UUID PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     username VARCHAR(256) NOT NULL UNIQUE,
     password VARCHAR(72) NOT NULL
 )

@@ -9,6 +9,8 @@ import com.example.bankcards.entity.Transaction;
 import com.example.bankcards.mapper.TransactionMapper;
 import org.springframework.data.domain.Page;
 
+import java.util.List;
+
 @Mapper
 public class TransactionMapperImpl implements TransactionMapper {
     @Override
@@ -35,6 +37,12 @@ public class TransactionMapperImpl implements TransactionMapper {
 
     @Override
     public PageDto<TransactionDto> readPage(Page<Transaction> page) {
-        return null;
+        List<TransactionDto> content = page.getContent().stream().map(this::read).toList();
+        int number = page.getNumber();
+        int size = page.getSize();
+        int totalPages = page.getTotalPages();
+        boolean hasNext = page.hasNext();
+        boolean hasPrevious = page.hasPrevious();
+        return new PageDto<>(content, number, size, totalPages, hasNext, hasPrevious);
     }
 }

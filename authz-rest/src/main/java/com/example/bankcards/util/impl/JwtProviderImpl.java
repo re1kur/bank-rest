@@ -7,21 +7,18 @@ import com.example.bankcards.entity.sql.User;
 import com.example.bankcards.service.RefreshTokenService;
 import com.example.bankcards.util.JwtProvider;
 import com.example.bankcards.util.VaultClient;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
-import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -32,17 +29,13 @@ import java.nio.file.StandardOpenOption;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
-import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.Base64;
 import java.util.Date;
-import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -228,13 +221,11 @@ public class JwtProviderImpl implements JwtProvider {
                 .build();
 
         UUID userId = user.getId();
-        String roleNames = user.getRoles().stream()
-                .map(Role::getName).toList()
-                .toString().replace("[", "")
-                .replace("]", "");
         JWTClaimsSet accessPayload = new JWTClaimsSet.Builder()
                 .subject(userId.toString())
-                .claim("roles", roleNames)
+                .claim("roles", user.getRoles().stream()
+                        .map(Role::getName)
+                        .toList())
                 .claim("token_type", "access")
                 .issueTime(new Date())
                 .expirationTime(Date.from(LocalDateTime.now().plusMinutes(jwtAccessTtl).toInstant(ZoneOffset.UTC)))

@@ -10,7 +10,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.UUID;
 
 public interface UserService {
-    void create(UserPayload payload);
+    UUID create(UserPayload payload);
 
     UserDto read(UUID userId);
 

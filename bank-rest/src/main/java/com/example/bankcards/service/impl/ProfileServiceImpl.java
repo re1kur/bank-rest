@@ -7,6 +7,7 @@ import com.example.bankcards.core.dto.card.CardFullDto;
 import com.example.bankcards.core.dto.transaction.TransactionPayload;
 import com.example.bankcards.core.exception.UserDoesNotHavePermission;
 import com.example.bankcards.core.other.CardFilter;
+import com.example.bankcards.core.other.TransactionFilter;
 import com.example.bankcards.entity.Card;
 import com.example.bankcards.service.CardService;
 import com.example.bankcards.service.ProfileService;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -58,8 +60,11 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public PageDto<TransactionDto> readTransactions(JwtAuthenticationToken bearerToken, Pageable pageable) {
-//        PageDto<TransactionDto> page = transactionService.readAll(pageable);
-        return null;
+    public PageDto<TransactionDto> readTransactions(String userId, Pageable pageable) {
+        UUID userUuid = UUID.fromString(userId);
+        List<Card> cards = cardService.getByUserId(userUuid);
+        List<UUID> cardIds = cards.stream().map(Card::getId).toList();
+
+        return transactionService.readAll(pageable, TransactionFilter.builder().cardIds(cardIds).build());
     }
 }

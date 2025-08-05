@@ -4,9 +4,7 @@ import com.example.bankcards.core.exception.UserNotFoundException;
 import com.example.bankcards.service.UserClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -22,12 +20,16 @@ public class UserClientImpl implements UserClient {
     private String URI;
 
     @Override
-    public void checkIfExists(UUID userId) {
+    public void checkIfExists(UUID userId, String bearer) {
         try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(bearer);
+
+            HttpEntity<Object> entity = new HttpEntity<>(null, headers);
             ResponseEntity<Void> response = template.exchange(
                     "%s/%s".formatted(URI, userId),
                     HttpMethod.GET,
-                    null,
+                    entity,
                     Void.class
             );
 

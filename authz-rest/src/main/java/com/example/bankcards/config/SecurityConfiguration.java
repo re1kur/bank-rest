@@ -1,7 +1,5 @@
 package com.example.bankcards.config;
 
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,6 +33,10 @@ public class SecurityConfiguration {
                 .sessionManagement(
                         session -> session
                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> jwt
+                                .jwkSetUri(jwkSetUri)
+                                .jwtAuthenticationConverter(jwtAuthenticationConverter())))
                 .authorizeHttpRequests(req -> req
                         .requestMatchers(
                                 "/api/v1/auth/**",
@@ -49,7 +51,11 @@ public class SecurityConfiguration {
                                 "/api/v1/users",
                                 "/api/v1/roles/**",
                                 "/api/v1/roles"
-                        ).hasRole("ADMIN")
+                        ).hasAuthority("ADMIN")
+                        .requestMatchers(
+                                "/api/v1/profile"
+                        )
+                        .hasAuthority("USER")
                         .anyRequest().authenticated()
                 );
 
@@ -61,6 +67,7 @@ public class SecurityConfiguration {
         JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
         JwtGrantedAuthoritiesConverter authoritiesConverter = new JwtGrantedAuthoritiesConverter();
         authoritiesConverter.setAuthorityPrefix("");
+        authoritiesConverter.setAuthoritiesClaimName("roles");
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(authoritiesConverter);
         return jwtAuthenticationConverter;
     }

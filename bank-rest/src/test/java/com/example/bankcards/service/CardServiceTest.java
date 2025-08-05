@@ -57,7 +57,7 @@ class CardServiceTest {
         String hash = DigestUtils.sha256Hex("1234123141231231");
 
         when(repo.existsByNumberHash(hash)).thenReturn(false);
-        doNothing().when(userClient).checkIfExists(userId);
+        doNothing().when(userClient).checkIfExists(userId, bearer);
         when(mapper.create(new CardPayload(userId, "1234123141231231", LocalDate.now().plusDays(30), "visa")))
                 .thenReturn(Card.builder()
                         .id(userId)
@@ -67,10 +67,10 @@ class CardServiceTest {
                 .build())).thenReturn(
                 Card.builder().id(cardId).build());
 
-        assertDoesNotThrow(() -> service.create(payload));
+        assertDoesNotThrow(() -> service.create(payload, jwt.getSubject()));
 
         verify(repo, times(1)).existsByNumberHash(hash);
-        verify(userClient, times(1)).checkIfExists(userId);
+        verify(userClient, times(1)).checkIfExists(userId, bearer);
         verify(mapper, times(1)).create(payload);
         verify(repo, times(1)).save(expected);
     }
@@ -84,7 +84,7 @@ class CardServiceTest {
 
         when(repo.existsByNumberHash(hash)).thenReturn(true);
 
-        assertThrows(CardAlreadyExistsException.class, () -> service.create(payload));
+        assertThrows(CardAlreadyExistsException.class, () -> service.create(payload, jwt.getSubject()));
 
         verify(repo, times(1)).existsByNumberHash(hash);
         verifyNoInteractions(mapper, userClient);
@@ -98,12 +98,12 @@ class CardServiceTest {
         String hash = DigestUtils.sha256Hex("1234123141231231");
 
         when(repo.existsByNumberHash(hash)).thenReturn(false);
-        doThrow(UserNotFoundException.class).when(userClient).checkIfExists(userId);
+        doThrow(UserNotFoundException.class).when(userClient).checkIfExists(userId, bearer);
 
-        assertThrows(UserNotFoundException.class, () -> service.create(payload));
+        assertThrows(UserNotFoundException.class, () -> service.create(payload, jwt.getSubject()));
 
         verify(repo, times(1)).existsByNumberHash(hash);
-        verify(userClient, times(1)).checkIfExists(userId);
+        verify(userClient, times(1)).checkIfExists(userId, bearer);
         verifyNoInteractions(mapper);
         verifyNoMoreInteractions(repo);
     }

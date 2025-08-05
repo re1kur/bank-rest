@@ -9,7 +9,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: http://localhost:8081/api/v1/auth/.well-known.jwks
+          jwk-set-uri: http://localhost:8081/api/v1/auth/.well-known/jwks
 
 
 
@@ -29,3 +29,8 @@ jwt:
   privateKeyPath: /tmp/private.key
   publicKeyPath: /tmp/public.key
   kidPath: /tmp/kid.txt
+
+
+logging:
+  level:
+    org.springframework.security: DEBUG

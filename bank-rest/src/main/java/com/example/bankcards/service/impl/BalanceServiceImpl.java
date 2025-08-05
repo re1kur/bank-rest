@@ -44,7 +44,7 @@ public class BalanceServiceImpl implements BalanceService {
     }
 
     private void checkConflicts(Balance balance, BalanceUpdatePayload payload) {
-//        if (balance.getBlocked())
-//            throw new BalanceIsBlockedException("Balance is blocked");
+        if (balance.getBlocked())
+            throw new IllegalStateException("Balance is blocked. Do it later");
     }
 }

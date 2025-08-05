@@ -1,6 +1,5 @@
 package com.example.bankcards.repository;
 
-import com.example.bankcards.core.dto.card.CardStatus;
 import com.example.bankcards.entity.Card;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,34 +10,29 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Repository
 public interface CardRepository extends CrudRepository<Card, UUID> {
     Boolean existsByNumberHash(String numberHash);
 
-    @Query(value = """
-    SELECT c.* FROM cards c
-    JOIN card_balances b ON c.id = b.card_id
-    WHERE (:userId IS NULL OR c.user_id = :userId)
-      AND (:status IS NULL OR c.status = :status)
-      AND (:expirationDate IS NULL OR c.expiration_date = :expirationDate)
-      AND (:amount IS NULL OR b.value = :amount)
-    ORDER BY
-        CASE WHEN :amountDesc = TRUE THEN b.value END DESC,
-        CASE WHEN :amountDesc = FALSE THEN b.value END ASC,
-        CASE WHEN :dateDesc = TRUE THEN c.expiration_date END DESC,
-        CASE WHEN :dateDesc = FALSE THEN c.expiration_date END ASC
-    """,
-            countQuery = """
-    SELECT COUNT(*) FROM cards c
-    JOIN card_balances b ON c.id = b.card_id
-    WHERE (:userId IS NULL OR c.user_id = :userId)
-      AND (:status IS NULL OR c.status = :status)
-      AND (:expirationDate IS NULL OR c.expiration_date = :expirationDate)
-      AND (:amount IS NULL OR b.value = :amount)
-    """,
-            nativeQuery = true)
+    @Query(
+            value = """
+        SELECT c FROM Card c
+        JOIN c.balance b
+        WHERE
+            (:userId IS NULL OR c.userId = :userId) AND
+            (:status IS NULL OR c.status = :status) AND
+            (:expirationDate IS NULL OR c.expirationDate = :expirationDate) AND
+            (:amount IS NULL OR b.value = :amount)
+        ORDER BY
+            CASE WHEN :amountDesc = TRUE THEN b.value END DESC,
+            CASE WHEN :amountDesc = FALSE THEN b.value END ASC,
+            CASE WHEN :dateDesc = TRUE THEN c.expirationDate END DESC,
+            CASE WHEN :dateDesc = FALSE THEN c.expirationDate END ASC
+        """
+    )
     Page<Card> findAll(
             Pageable pageable,
             @Param("amount") BigDecimal amount,
@@ -48,4 +42,6 @@ public interface CardRepository extends CrudRepository<Card, UUID> {
             @Param("status") String status,
             @Param("userId") UUID userId
     );
+
+    List<Card> findAllByUserId(UUID userId);
 }

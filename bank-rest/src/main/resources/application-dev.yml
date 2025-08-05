@@ -8,7 +8,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: http://localhost:8081/api/v1/auth/.well-known.jwks
+          jwk-set-uri: http://localhost:8081/api/v1/auth/.well-known/jwks
   vault:
     port: 8200
     host: localhost
@@ -18,3 +18,11 @@ spring:
     uri: http://localhost:8081/api/v1/users
   liquibase:
     change-log: db/migration/db.changelog-master.yml
+  rabbitmq:
+    virtual-host: /
+    username: developer
+    password: developer
+
+logging:
+  level:
+    org.springframework.security: DEBUG
