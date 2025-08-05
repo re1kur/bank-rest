@@ -1,3 +1,8 @@
 **/target
+bank-rest/target/**
+bank-rest/target
+
+authz-rest/target
+authz-rest/target/**
 
 **/build/**/environment/*.env
