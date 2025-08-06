@@ -7,6 +7,7 @@ import com.example.bankcards.core.exception.TransactionNotFoundException;
 import com.example.bankcards.entity.Card;
 import com.example.bankcards.entity.Transaction;
 import com.example.bankcards.mapper.TransactionMapper;
+import com.example.bankcards.mq.EventPublisher;
 import com.example.bankcards.repository.TransactionRepository;
 import com.example.bankcards.service.impl.TransactionServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,9 @@ public class TransactionServiceTest {
 
     @Mock
     private CardService cardService;
+
+    @Mock
+    private EventPublisher publisher;
 
 
     @Test

@@ -63,13 +63,13 @@ public class BalanceServiceTest {
     @Test
     void update__DoesNotThrowsException() {
         UUID cardId = UUID.randomUUID();
-        BalanceUpdatePayload payload = new BalanceUpdatePayload(new BigDecimal(200), false);
-        Balance expectedFound = Balance.builder().value(new BigDecimal(0)).blocked(true).cardId(cardId).card(Card.builder().id(cardId).build()).build();
+        BalanceUpdatePayload payload = new BalanceUpdatePayload(new BigDecimal(200), null);
+        Balance expectedFound = Balance.builder().value(new BigDecimal(0)).blocked(false).cardId(cardId).card(Card.builder().id(cardId).build()).build();
         Balance expectedMapped = Balance.builder().value(new BigDecimal(200)).blocked(false).cardId(cardId).card(Card.builder().id(cardId).build()).build();
 
 
-        Balance mockFound = Balance.builder().value(new BigDecimal(0)).blocked(true).cardId(cardId).card(Card.builder().id(cardId).build()).build();
-        BalanceUpdatePayload mockPayload = new BalanceUpdatePayload(new BigDecimal(200), false);
+        Balance mockFound = Balance.builder().value(new BigDecimal(0)).blocked(false).cardId(cardId).card(Card.builder().id(cardId).build()).build();
+        BalanceUpdatePayload mockPayload = new BalanceUpdatePayload(new BigDecimal(200), null);
         Balance mockMapped = Balance.builder().value(new BigDecimal(200)).blocked(false).cardId(cardId).card(Card.builder().id(cardId).build()).build();
         Balance mockSaved = Balance.builder().value(new BigDecimal(200)).blocked(false).cardId(cardId).card(Card.builder().id(cardId).build()).build();
 

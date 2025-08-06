@@ -5,4 +5,4 @@ bank-rest/target
 authz-rest/target
 authz-rest/target/**
 
-**/build/**/environment/*.env
+#**/build/**/environment/*.env

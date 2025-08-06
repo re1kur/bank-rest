@@ -17,20 +17,22 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = CardsController.class)
-@AutoConfigureMockMvc(addFilters = false)
 public class CardsControllerTest {
     @Autowired
     MockMvc mvc;
@@ -43,27 +45,35 @@ public class CardsControllerTest {
 
     private static final String URI = "/api/v1/cards";
 
+    private static RequestPostProcessor jwtToken(String tokenValue, String subject) {
+        return jwt().jwt(jwt -> jwt.tokenValue(tokenValue).claim("subject", subject));
+    }
+
+
     @Test
     void create__ReturnsOk() throws Exception {
         CardPayload payload = new CardPayload(UUID.randomUUID(), "1234123141231231", LocalDate.now().plusDays(30), "visa");
 
-        doNothing().when(service).create(payload, jwt.getSubject());
+        doNothing().when(service).create(payload, "fake-token");
 
         mvc.perform(post(URI)
+                        .with(jwtToken("fake-token", "1234567890"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(payload)))
                 .andExpect(status().isOk());
 
-        verify(service, times(1)).create(payload, jwt.getSubject());
+        verify(service, times(1)).create(payload, "fake-token");
     }
 
     @Test
     void create__EmptyNumber__ReturnsBadRequest() throws Exception {
+        String subject = "1234567890";
         CardPayload payload = new CardPayload(UUID.randomUUID(), "", LocalDate.now().plusDays(30), "visa");
 
-        doNothing().when(service).create(payload, jwt.getSubject());
+        doNothing().when(service).create(payload, subject);
 
         mvc.perform(post(URI)
+                        .with(jwtToken("fake-token", subject))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(payload)))
                 .andExpect(status().isBadRequest());
@@ -73,11 +83,13 @@ public class CardsControllerTest {
 
     @Test
     void create__EmptyUserId__ReturnsBadRequest() throws Exception {
+        String subject = "1234567890";
         CardPayload payload = new CardPayload(null, "1234123141231231", LocalDate.now().plusDays(30), "visa");
 
-        doNothing().when(service).create(payload, jwt.getSubject());
+        doNothing().when(service).create(payload, subject);
 
         mvc.perform(post(URI)
+                        .with(jwtToken("fake-token", subject))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(payload)))
                 .andExpect(status().isBadRequest());
@@ -87,11 +99,13 @@ public class CardsControllerTest {
 
     @Test
     void create__PastExpirationDate__ReturnsBadRequest() throws Exception {
+        String subject = "1234567890";
         CardPayload payload = new CardPayload(null, "1234123141231231", LocalDate.now().minusDays(30), "visa");
 
-        doNothing().when(service).create(payload, jwt.getSubject());
+        doNothing().when(service).create(payload, subject);
 
         mvc.perform(post(URI)
+                        .with(jwtToken("fake-token", subject))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(payload)))
                 .andExpect(status().isBadRequest());
@@ -101,16 +115,18 @@ public class CardsControllerTest {
 
     @Test
     void create__CardNumberIsOccupied__ReturnsConflict() throws Exception {
+        String subject = "1234567890";
         CardPayload payload = new CardPayload(UUID.randomUUID(), "1234123141231231", LocalDate.now().plusDays(30), "visa");
 
-        doThrow(CardAlreadyExistsException.class).when(service).create(payload, jwt.getSubject());
+        doThrow(CardAlreadyExistsException.class).when(service).create(payload, "fake-token");
 
         mvc.perform(post(URI)
+                        .with(jwtToken("fake-token", subject))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(payload)))
                 .andExpect(status().isConflict());
 
-        verify(service, times(1)).create(payload, jwt.getSubject());
+        verify(service, times(1)).create(payload, "fake-token");
     }
 
     @Test
@@ -120,7 +136,9 @@ public class CardsControllerTest {
 
         when(service.read(cardId)).thenReturn(CardDto.builder().id(cardId).build());
 
-        mvc.perform(get(URI + "/%s".formatted(cardId)))
+        mvc.perform(get(URI + "/%s".formatted(cardId))
+                        .with(jwtToken("fake-token", "subject"))
+                )
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(expected)));
 
@@ -133,7 +151,9 @@ public class CardsControllerTest {
 
         when(service.read(cardId)).thenThrow(CardNotFoundException.class);
 
-        mvc.perform(get(URI + "/%s".formatted(cardId)))
+        mvc.perform(get(URI + "/%s".formatted(cardId))
+                        .with(jwtToken("fake-token", "subject"))
+                )
                 .andExpect(status().isBadRequest());
 
         verify(service, times(1)).read(cardId);
@@ -147,6 +167,7 @@ public class CardsControllerTest {
         doNothing().when(service).update(cardId, payload);
 
         mvc.perform(put(URI + "/%s".formatted(cardId))
+                        .with(jwtToken("fake-token", "subject"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(payload)))
                 .andExpect(status().isNoContent());
@@ -162,6 +183,7 @@ public class CardsControllerTest {
         doThrow(CardNotFoundException.class).when(service).update(cardId, payload);
 
         mvc.perform(put(URI + "/%s".formatted(cardId))
+                        .with(jwtToken("fake-token", "subject"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(payload)))
                 .andExpect(status().isBadRequest());
@@ -175,6 +197,7 @@ public class CardsControllerTest {
         CardUpdatePayload payload = new CardUpdatePayload(null, LocalDate.now().plusDays(30));
 
         mvc.perform(put(URI + "/%s".formatted(cardId))
+                        .with(jwtToken("fake-token", "subject"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(payload)))
                 .andExpect(status().isBadRequest());
@@ -188,6 +211,7 @@ public class CardsControllerTest {
         CardUpdatePayload payload = new CardUpdatePayload(CardStatus.active, LocalDate.now().minusDays(30));
 
         mvc.perform(put(URI + "/%s".formatted(cardId))
+                        .with(jwtToken("fake-token", "subject"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(payload)))
                 .andExpect(status().isBadRequest());
@@ -201,7 +225,9 @@ public class CardsControllerTest {
 
         doNothing().when(service).delete(cardId);
 
-        mvc.perform(delete(URI + "/%s".formatted(cardId)))
+        mvc.perform(delete(URI + "/%s".formatted(cardId))
+                        .with(jwtToken("fake-token", "subject"))
+                )
                 .andExpect(status().isNoContent());
 
         verify(service, times(1)).delete(cardId);
@@ -213,7 +239,9 @@ public class CardsControllerTest {
 
         doThrow(CardNotFoundException.class).when(service).delete(cardId);
 
-        mvc.perform(delete(URI + "/%s".formatted(cardId)))
+        mvc.perform(delete(URI + "/%s".formatted(cardId))
+                        .with(jwtToken("fake-token", "subject"))
+                )
                 .andExpect(status().isBadRequest());
 
         verify(service, times(1)).delete(cardId);
@@ -235,6 +263,7 @@ public class CardsControllerTest {
                 CardDto.builder().userId(userId2).build()), 0, 5, 1, false, false));
 
         mvc.perform(get(URI)
+                        .with(jwtToken("fake-token", "subject"))
                         .param("page", String.valueOf(page))
                         .param("size", String.valueOf(size)))
                 .andExpect(status().isOk())

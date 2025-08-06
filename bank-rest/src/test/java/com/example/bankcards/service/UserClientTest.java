@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -17,8 +18,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doThrow;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,18 +29,14 @@ class UserClientTest {
     @Mock
     private RestTemplate restTemplate;
 
-    @BeforeEach
-    void setUp() {
-        ReflectionTestUtils.setField(client, "URI", "http://localhost:8081/api/v1/users");
-    }
-
-
     @Test
     void checkIfExists_ShouldThrowException_WhenUserNotFound() {
+        String bearer = "jwtBearer";
         UUID userId = UUID.randomUUID();
-        String url = "http://localhost:8081/api/v1/users/" + userId;
 
-        doThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST)).when(restTemplate).exchange(eq(url), eq(HttpMethod.GET), isNull(), eq(Void.class));
+        doThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST))
+                .when(restTemplate)
+                .exchange(anyString(), eq(HttpMethod.GET), any(HttpEntity.class), eq(Void.class));
 
         assertThrows(UserNotFoundException.class, () -> client.checkIfExists(userId, bearer));
     }

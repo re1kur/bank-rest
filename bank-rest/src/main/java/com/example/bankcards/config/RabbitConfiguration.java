@@ -1,6 +1,7 @@
 package com.example.bankcards.config;
 
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
+import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
@@ -22,5 +23,15 @@ public class RabbitConfiguration {
         RabbitTemplate template = new RabbitTemplate(connectionFactory);
         template.setMessageConverter(converter);
         return template;
+    }
+
+    @Bean
+    public CachingConnectionFactory connectionFactory() {
+        CachingConnectionFactory factory = new CachingConnectionFactory();
+        factory.setHost("rabbit");
+        factory.setPort(5672);
+        factory.setUsername("bankrestusername");
+        factory.setPassword("bankrestpassword");
+        return factory;
     }
 }

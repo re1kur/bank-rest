@@ -44,11 +44,13 @@ public class UsersControllerTest {
     void create__ReturnsOk() throws Exception {
         UserPayload payload = new UserPayload("username", "password", List.of(1));
 
-        doNothing().when(service).create(payload);
+        UUID userId = UUID.randomUUID();
+        when(service.create(payload)).thenReturn(userId);
 
         mvc.perform(post(URI).contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(payload)))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(content().json(mapper.writeValueAsString(userId)));
 
         verify(service, times(1)).create(payload);
     }

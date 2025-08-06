@@ -4,42 +4,22 @@ info:
   description: JWT Access Token authentication. First login and you will receive token pair.
   contact:
     name: Egor Gunter
-    url: zerrox05@mail.ru
+    url: zerrrox05@mail.ru
     email: mail.com
   license:
     name: License of API
     url: API license URL
   version: "1.0"
 servers:
-  - url: http://localhost:8080
+  - url: http://localhost:8081
     description: Generated server url
 security:
   - Bearer Authentication: []
 paths:
-  /api/v1/profile/cards/{id}/block:
-    put:
-      tags:
-        - profile-controller
-      operationId: blockCard
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-          content:
-            "*/*":
-              schema:
-                type: object
-  /api/v1/cards/{id}:
+  /api/v1/users/{id}:
     get:
-      tags:
-        - cards-controller
-      operationId: readCard
+      tags: [users-controller]
+      operationId: readUser
       parameters:
         - name: id
           in: path
@@ -55,9 +35,8 @@ paths:
               schema:
                 type: object
     put:
-      tags:
-        - cards-controller
-      operationId: updateCard
+      tags: [users-controller]
+      operationId: updateUser
       parameters:
         - name: id
           in: path
@@ -70,7 +49,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CardUpdatePayload"
+              $ref: "#/components/schemas/UserUpdatePayload"
       responses:
         "200":
           description: OK
@@ -79,9 +58,8 @@ paths:
               schema:
                 type: object
     delete:
-      tags:
-        - cards-controller
-      operationId: deleteCard
+      tags: [users-controller]
+      operationId: deleteUser
       parameters:
         - name: id
           in: path
@@ -96,18 +74,18 @@ paths:
             "*/*":
               schema:
                 type: object
-  /api/v1/balances/{id}:
+
+  /api/v1/roles/{id}:
     get:
-      tags:
-        - balance-controller
-      operationId: readBalance
+      tags: [roles-controller]
+      operationId: readRole
       parameters:
         - name: id
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int32
       responses:
         "200":
           description: OK
@@ -116,22 +94,21 @@ paths:
               schema:
                 type: object
     put:
-      tags:
-        - balance-controller
-      operationId: updateBalance
+      tags: [roles-controller]
+      operationId: updateRole
       parameters:
         - name: id
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int32
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/BalanceUpdatePayload"
+              $ref: "#/components/schemas/RoleUpdatePayload"
       responses:
         "200":
           description: OK
@@ -139,31 +116,16 @@ paths:
             "*/*":
               schema:
                 type: object
-  /api/v1/transactions:
-    get:
-      tags:
-        - transactions-controller
-      operationId: readTransactions
+    delete:
+      tags: [roles-controller]
+      operationId: deleteRole
       parameters:
-        - name: page
-          in: query
-          required: false
-          schema:
-            type: integer
-            format: int32
-            default: 0
-        - name: size
-          in: query
-          required: false
-          schema:
-            type: integer
-            format: int32
-            default: 5
-        - name: filter
-          in: query
+        - name: id
+          in: path
           required: true
           schema:
-            $ref: "#/components/schemas/TransactionFilter"
+            type: integer
+            format: int32
       responses:
         "200":
           description: OK
@@ -171,39 +133,20 @@ paths:
             "*/*":
               schema:
                 type: object
-    post:
-      tags:
-        - transactions-controller
-      operationId: createTransaction
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/TransactionPayload"
-      responses:
-        "200":
-          description: OK
-          content:
-            "*/*":
-              schema:
-                type: object
-  /api/v1/profile/transactions:
+
+  /api/v1/users:
     get:
-      tags:
-        - profile-controller
-      operationId: readTransactions_1
+      tags: [users-controller]
+      operationId: getRoles
       parameters:
         - name: page
           in: query
-          required: false
           schema:
             type: integer
             format: int32
             default: 0
         - name: size
           in: query
-          required: false
           schema:
             type: integer
             format: int32
@@ -216,15 +159,14 @@ paths:
               schema:
                 type: object
     post:
-      tags:
-        - profile-controller
-      operationId: createTransaction_1
+      tags: [users-controller]
+      operationId: createUser
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/TransactionPayload"
+              $ref: "#/components/schemas/UserPayload"
       responses:
         "200":
           description: OK
@@ -232,31 +174,24 @@ paths:
             "*/*":
               schema:
                 type: object
-  /api/v1/cards:
+
+  /api/v1/roles:
     get:
-      tags:
-        - cards-controller
-      operationId: getCards
+      tags: [roles-controller]
+      operationId: getRoles_1
       parameters:
         - name: page
           in: query
-          required: false
           schema:
             type: integer
             format: int32
             default: 0
         - name: size
           in: query
-          required: false
           schema:
             type: integer
             format: int32
             default: 5
-        - name: filter
-          in: query
-          required: true
-          schema:
-            $ref: "#/components/schemas/CardFilter"
       responses:
         "200":
           description: OK
@@ -265,15 +200,14 @@ paths:
               schema:
                 type: object
     post:
-      tags:
-        - cards-controller
-      operationId: createCard
+      tags: [roles-controller]
+      operationId: createRole
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CardPayload"
+              $ref: "#/components/schemas/RolePayload"
       responses:
         "200":
           description: OK
@@ -281,18 +215,83 @@ paths:
             "*/*":
               schema:
                 type: object
-  /api/v1/transactions/{id}:
+
+  /api/v1/auth/register:
+    post:
+      tags: [authentication-controller]
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            "*/*":
+              schema:
+                type: object
+
+  /api/v1/auth/refresh:
+    post:
+      tags: [authentication-controller]
+      operationId: refreshAccessToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshTokenPayload"
+      responses:
+        "200":
+          description: OK
+          content:
+            "*/*":
+              schema:
+                type: object
+
+  /api/v1/auth/logout:
+    post:
+      tags: [authentication-controller]
+      operationId: logoutUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshTokenPayload"
+      responses:
+        "200":
+          description: OK
+          content:
+            "*/*":
+              schema:
+                type: object
+
+  /api/v1/auth/login:
+    post:
+      tags: [authentication-controller]
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            "*/*":
+              schema:
+                type: object
+
+  /api/v1/profile:
     get:
-      tags:
-        - transactions-controller
-      operationId: readTransaction
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      tags: [profile-controller]
+      operationId: getProfile
       responses:
         "200":
           description: OK
@@ -300,26 +299,11 @@ paths:
             "*/*":
               schema:
                 type: object
-  /api/v1/profile/cards:
+
+  /api/v1/auth/.well-known/jwks:
     get:
-      tags:
-        - profile-controller
-      operationId: getUserCards
-      parameters:
-        - name: page
-          in: query
-          required: false
-          schema:
-            type: integer
-            format: int32
-            default: 0
-        - name: size
-          in: query
-          required: false
-          schema:
-            type: integer
-            format: int32
-            default: 5
+      tags: [authentication-controller]
+      operationId: jwksEndpoint
       responses:
         "200":
           description: OK
@@ -327,108 +311,81 @@ paths:
             "*/*":
               schema:
                 type: object
-  /api/v1/profile/cards/{id}:
-    get:
-      tags:
-        - profile-controller
-      operationId: getUserCard
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-          content:
-            "*/*":
-              schema:
-                type: object
+
 components:
   schemas:
-    CardUpdatePayload:
+    UserUpdatePayload:
       type: object
+      required: [roleIds, username]
       properties:
-        status:
+        username:
           type: string
-          enum: [active, blocked, expired]
-        expirationDate:
-          type: string
-          format: date
-      required: [status]
-    BalanceUpdatePayload:
+          minLength: 6
+          maxLength: 256
+        roleIds:
+          type: array
+          minItems: 1
+          items:
+            type: integer
+            format: int32
+    RoleUpdatePayload:
       type: object
+      required: [name]
       properties:
-        value:
-          type: number
-        blocked:
-          type: boolean
-    TransactionPayload:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 32
+    UserPayload:
       type: object
+      required: [password, username]
       properties:
-        senderCardId:
+        username:
           type: string
-          format: uuid
-        receiverCardId:
-          type: string
-          format: uuid
-        amount:
-          type: number
-      required: [amount, receiverCardId, senderCardId]
-    CardPayload:
-      type: object
-      properties:
-        userId:
-          type: string
-          format: uuid
-        number:
+          minLength: 6
+          maxLength: 256
+        password:
           type: string
           minLength: 1
-          pattern: "^\d{16}$"
-        expirationDate:
-          type: string
-          format: date
-        brand:
-          type: string
-          maxLength: 32
-          minLength: 0
-      required: [brand, number, userId]
-    TransactionFilter:
-      type: object
-      properties:
-        cardIds:
+        roleIds:
           type: array
           items:
-            type: string
-            format: uuid
-        senderCardId:
-          type: string
-          format: uuid
-        receiverCardId:
-          type: string
-          format: uuid
-        amount:
-          type: number
-    CardFilter:
+            type: integer
+            format: int32
+    RolePayload:
       type: object
+      required: [name]
       properties:
-        userId:
+        name:
           type: string
-          format: uuid
-        status:
+          minLength: 3
+          maxLength: 32
+    RegisterRequest:
+      type: object
+      required: [password, username]
+      properties:
+        username:
           type: string
-          enum: [active, blocked, expired]
-        amountDesc:
-          type: boolean
-        amount:
-          type: number
-        expirationDate:
+          minLength: 6
+          maxLength: 256
+        password:
           type: string
-          format: date-time
-        dateDesc:
-          type: boolean
+          minLength: 1
+    RefreshTokenPayload:
+      type: object
+      required: [value]
+      properties:
+        value:
+          type: string
+    LoginRequest:
+      type: object
+      required: [password, username]
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+
   securitySchemes:
     Bearer Authentication:
       type: http

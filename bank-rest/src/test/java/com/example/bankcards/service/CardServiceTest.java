@@ -23,6 +23,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -31,6 +33,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 
 @ExtendWith(MockitoExtension.class)
 class CardServiceTest {
@@ -48,6 +51,7 @@ class CardServiceTest {
 
     @Test
     void create__DoesNotThrowsException() {
+        String bearer = "fake-token";
         UUID cardId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
         CardPayload payload = new CardPayload(userId, "1234123141231231", LocalDate.now().plusDays(30), "visa");
@@ -67,7 +71,7 @@ class CardServiceTest {
                 .build())).thenReturn(
                 Card.builder().id(cardId).build());
 
-        assertDoesNotThrow(() -> service.create(payload, jwt.getSubject()));
+        assertDoesNotThrow(() -> service.create(payload, bearer));
 
         verify(repo, times(1)).existsByNumberHash(hash);
         verify(userClient, times(1)).checkIfExists(userId, bearer);
@@ -77,6 +81,8 @@ class CardServiceTest {
 
     @Test
     void create__CardNumberIsOccupied__ThrowsException() {
+        String bearer = "fake-token";
+
         UUID userId = UUID.randomUUID();
         CardPayload payload = new CardPayload(userId, "1234123141231231", LocalDate.now().plusDays(30), "visa");
 
@@ -84,7 +90,7 @@ class CardServiceTest {
 
         when(repo.existsByNumberHash(hash)).thenReturn(true);
 
-        assertThrows(CardAlreadyExistsException.class, () -> service.create(payload, jwt.getSubject()));
+        assertThrows(CardAlreadyExistsException.class, () -> service.create(payload, bearer));
 
         verify(repo, times(1)).existsByNumberHash(hash);
         verifyNoInteractions(mapper, userClient);
@@ -93,6 +99,8 @@ class CardServiceTest {
 
     @Test
     void create__UserNotFound__ThrowsException() {
+        String bearer = "fake-token";
+
         UUID userId = UUID.randomUUID();
         CardPayload payload = new CardPayload(userId, "1234123141231231", LocalDate.now().plusDays(30), "visa");
         String hash = DigestUtils.sha256Hex("1234123141231231");
@@ -100,7 +108,7 @@ class CardServiceTest {
         when(repo.existsByNumberHash(hash)).thenReturn(false);
         doThrow(UserNotFoundException.class).when(userClient).checkIfExists(userId, bearer);
 
-        assertThrows(UserNotFoundException.class, () -> service.create(payload, jwt.getSubject()));
+        assertThrows(UserNotFoundException.class, () -> service.create(payload, bearer));
 
         verify(repo, times(1)).existsByNumberHash(hash);
         verify(userClient, times(1)).checkIfExists(userId, bearer);
@@ -238,15 +246,14 @@ class CardServiceTest {
         PageDto<CardDto> mockMapped = new PageDto<>(List.of(CardDto.builder().userId(userId1).build(),
                 CardDto.builder().userId(userId2).build()), 0, 5, 1, false, false);
 
-        when(repo.findAll(pageable, null, null, null, null, null, null)).thenReturn(mockFound);
+        when(repo.findAll(pageable, null, false, null, false, null, null)).thenReturn(mockFound);
         when(mapper.readPage(mockFound)).thenReturn(mockMapped);
 
         PageDto<CardDto> result = assertDoesNotThrow(() -> service.readAll(pageable, filter));
 
         assertEquals(expected, result);
 
-        verify(repo, times(1)).findAll(pageable,
-                null, null, null, null, null, null);
+        verify(repo, times(1)).findAll(pageable, null, false, null, false, null, null);
         verify(mapper, times(1)).readPage(expectedFound);
     }
 }

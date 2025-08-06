@@ -1,0 +1,25 @@
+#file: noinspection undefined
+spring:
+  docker:
+    compose:
+      enabled: false
+  devtools:
+    add-properties: false
+  datasource:
+    password: ${POSTGRES_PASSWORD}
+    username: ${POSTGRES_USER}
+    url: ${POSTGRES_URL}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://authz-rest:8081/api/v1/auth/.well-known/jwks
+  vault:
+    uri: ${VAULT_BASE_URL}
+    token: ${VAULT_DEV_ROOT_TOKEN_ID}
+  authz:
+    uri: http://authz-rest:8081/api/v1/users
+  rabbitmq:
+    virtual-host: ${RABBITMQ_DEFAULT_VHOST}
+    username: ${RABBITMQ_DEFAULT_USER}
+    password: ${RABBITMQ_DEFAULT_PASS}
