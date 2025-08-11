@@ -25,7 +25,6 @@ import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -143,7 +142,7 @@ public class AuthServiceImpl implements AuthService {
         if (LocalDateTime.now().isAfter(dbExpiresAt))
             throw new TokenHasExpiredException("Refresh token [%s] has expired.".formatted(token));
 
-        if (!Objects.equals(found.getValue(), token))
+        if (!found.getValue().equals(token))
             throw new TokenIsInvalidException("Refresh token [%s] is invalid.".formatted(token));
 
 

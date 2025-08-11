@@ -2,10 +2,7 @@ package com.example.bankcards.entity;
 
 import com.example.bankcards.core.dto.transaction.TransactionStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -13,7 +10,8 @@ import java.util.UUID;
 
 @Table(name = "transactions")
 @Entity
-@Data
+@Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -41,4 +39,18 @@ public class Transaction {
 
     @Column(insertable = false)
     private LocalDateTime processedTimestamp;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (!(o instanceof Transaction transaction)) return false;
+
+        return id.equals(transaction.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
 }
