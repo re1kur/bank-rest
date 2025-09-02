@@ -9,7 +9,8 @@ CREATE TABLE IF NOT EXISTS cards
     number_hash char(64) NOT NULL UNIQUE,
     last4 CHAR(4) NOT NULL,
     expiration_date DATE NOT NULL,
-    status VARCHAR(16) NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'blocked', 'expired'))
+    status VARCHAR(16) NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'blocked', 'expired')),
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 --changeset re1kur:2

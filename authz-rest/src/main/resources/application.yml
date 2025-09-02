@@ -1,9 +1,0 @@
-spring:
-  application:
-    name: authz-rest
-  liquibase:
-    change-log: db/migration/db.changelog-master.yml
-
-
-server:
-  port: 8081

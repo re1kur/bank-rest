@@ -3,10 +3,10 @@ package com.example.bankcards.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
@@ -41,7 +41,8 @@ public class SecurityConfiguration {
                                 "/v3/api-docs",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
-                                "/swagger-ui.html"
+                                "/swagger-ui.html",
+                                "/api/v1/auth/**"
                         ).permitAll()
                         .requestMatchers(
                                 "/api/v1/cards/**",
@@ -49,7 +50,11 @@ public class SecurityConfiguration {
                                 "/api/v1/balances/**",
                                 "/api/v1/balances",
                                 "/api/v1/transactions/**",
-                                "/api/v1/transactions"
+                                "/api/v1/transactions",
+                                "/api/v1/users/**",
+                                "/api/v1/users",
+                                "/api/v1/roles/**",
+                                "/api/v1/roles"
                         ).hasAuthority("ADMIN")
                         .requestMatchers(
                                 "/api/v1/profile/**",
@@ -75,5 +80,10 @@ public class SecurityConfiguration {
         return NimbusJwtDecoder
                 .withJwkSetUri(jwkSetUri)
                 .build();
+    }
+
+    @Bean
+    public BCryptPasswordEncoder bCryptPasswordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }

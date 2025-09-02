@@ -104,4 +104,77 @@ public class AdviceController {
         log.info("ADVICE ILLEGAL STATE: [{}]", response);
         return ResponseEntity.status(status).body(response);
     }
+
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<Map<String, Object>> handleUserAlreadyExistsException(UserAlreadyExistsException exception) {
+        HttpStatus status = HttpStatus.CONFLICT;
+        Map<String, Object> response = getSimpleResponseMap(exception.getMessage(), status);
+
+        log.info("ADVICE USER CONFLICT: [{}]", response);
+        return ResponseEntity.status(status).body(response);
+    }
+
+
+    @ExceptionHandler(RoleNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleRoleNotFoundException(RoleNotFoundException exception) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        Map<String, Object> response = getSimpleResponseMap(exception.getMessage(), status);
+
+        log.info("ADVICE ROLE NOT FOUND: [{}]", response);
+        return ResponseEntity.status(status).body(response);
+    }
+
+    @ExceptionHandler(RoleAlreadyExistsException.class)
+    public ResponseEntity<Map<String, Object>> handleRoleAlreadyExistsException(RoleAlreadyExistsException exception) {
+        HttpStatus status = HttpStatus.CONFLICT;
+        Map<String, Object> response = getSimpleResponseMap(exception.getMessage(), status);
+
+        log.info("ADVICE ROLE CONFLICT: [{}]", response);
+        return ResponseEntity.status(status).body(response);
+    }
+
+    @ExceptionHandler(RefreshTokenNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleRefreshTokenNotFoundException(RefreshTokenNotFoundException exception) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        Map<String, Object> response = getSimpleResponseMap(exception.getMessage(), status);
+
+        log.info("ADVICE REFRESH TOKEN NOT FOUND: [{}]", response);
+        return ResponseEntity.status(status).body(response);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<Map<String, Object>> handleBadCredentialsException(BadCredentialsException exception) {
+        HttpStatus status = HttpStatus.UNAUTHORIZED;
+        Map<String, Object> response = getSimpleResponseMap(exception.getMessage(), status);
+
+        log.info("ADVICE BAD CREDENTIALS: [{}]", response);
+        return ResponseEntity.status(status).body(response);
+    }
+
+    @ExceptionHandler(TokenIsInvalidException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidTokenException(TokenIsInvalidException exception) {
+        HttpStatus status = HttpStatus.UNAUTHORIZED;
+        Map<String, Object> response = getSimpleResponseMap(exception.getMessage(), status);
+
+        log.info("ADVICE INVALID TOKEN: [{}]", response);
+        return ResponseEntity.status(status).body(response);
+    }
+
+    @ExceptionHandler(TokenHasExpiredException.class)
+    public ResponseEntity<Map<String, Object>> handleTokenHasExpiredException(TokenHasExpiredException exception) {
+        HttpStatus status = HttpStatus.UNAUTHORIZED;
+        Map<String, Object> response = getSimpleResponseMap(exception.getMessage(), status);
+
+        log.info("ADVICE TOKEN EXPIRED: [{}]", response);
+        return ResponseEntity.status(status).body(response);
+    }
+
+    @ExceptionHandler(TokenSignatureIsInvalidException.class)
+    public ResponseEntity<Map<String, Object>> handleTokenSignatureIsInvalidException(TokenSignatureIsInvalidException exception) {
+        HttpStatus status = HttpStatus.UNAUTHORIZED;
+        Map<String, Object> response = getSimpleResponseMap(exception.getMessage(), status);
+
+        log.info("ADVICE TOKEN HAS INVALID SIGNATURE: [{}]", response);
+        return ResponseEntity.status(status).body(response);
+    }
 }

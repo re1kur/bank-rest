@@ -5,6 +5,7 @@ import com.example.bankcards.core.dto.TransactionDto;
 import com.example.bankcards.core.dto.card.CardDto;
 import com.example.bankcards.core.dto.card.CardFullDto;
 import com.example.bankcards.core.dto.transaction.TransactionPayload;
+import com.example.bankcards.core.dto.user.UserDto;
 import com.example.bankcards.core.exception.UserDoesNotHavePermission;
 import com.example.bankcards.core.other.CardFilter;
 import com.example.bankcards.core.other.TransactionFilter;
@@ -12,10 +13,10 @@ import com.example.bankcards.entity.Card;
 import com.example.bankcards.service.CardService;
 import com.example.bankcards.service.ProfileService;
 import com.example.bankcards.service.TransactionService;
+import com.example.bankcards.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,6 +28,12 @@ import java.util.UUID;
 public class ProfileServiceImpl implements ProfileService {
     private final CardService cardService;
     private final TransactionService transactionService;
+    private final UserService userService;
+
+    @Override
+    public UserDto getProfile(String subject) {
+        return userService.read(UUID.fromString(subject));
+    }
 
     @Override
     public PageDto<CardDto> readCards(String bearerToken, Pageable pageable) {

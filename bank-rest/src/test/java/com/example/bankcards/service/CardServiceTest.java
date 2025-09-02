@@ -10,6 +10,7 @@ import com.example.bankcards.core.exception.CardNotFoundException;
 import com.example.bankcards.core.exception.UserNotFoundException;
 import com.example.bankcards.core.other.CardFilter;
 import com.example.bankcards.entity.Card;
+import com.example.bankcards.entity.User;
 import com.example.bankcards.mapper.CardMapper;
 import com.example.bankcards.repository.CardRepository;
 import com.example.bankcards.service.impl.CardServiceImpl;
@@ -23,8 +24,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -33,7 +32,6 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 
 @ExtendWith(MockitoExtension.class)
 class CardServiceTest {
@@ -47,7 +45,7 @@ class CardServiceTest {
     private CardRepository repo;
 
     @Mock
-    private UserClient userClient;
+    private UserService userService;
 
     @Test
     void create__DoesNotThrowsException() {
@@ -58,11 +56,12 @@ class CardServiceTest {
         Card expected = Card.builder()
                 .id(userId)
                 .build();
+        User mockUser = User.builder().id(userId).build();
         String hash = DigestUtils.sha256Hex("1234123141231231");
 
         when(repo.existsByNumberHash(hash)).thenReturn(false);
-        doNothing().when(userClient).checkIfExists(userId, bearer);
-        when(mapper.create(new CardPayload(userId, "1234123141231231", LocalDate.now().plusDays(30), "visa")))
+        when(userService.get(userId)).thenReturn(mockUser);
+        when(mapper.create(new CardPayload(userId, "1234123141231231", LocalDate.now().plusDays(30), "visa"), mockUser))
                 .thenReturn(Card.builder()
                         .id(userId)
                         .build());
@@ -74,8 +73,8 @@ class CardServiceTest {
         assertDoesNotThrow(() -> service.create(payload, bearer));
 
         verify(repo, times(1)).existsByNumberHash(hash);
-        verify(userClient, times(1)).checkIfExists(userId, bearer);
-        verify(mapper, times(1)).create(payload);
+        verify(userService, times(1)).get(userId);
+        verify(mapper, times(1)).create(payload, mockUser);
         verify(repo, times(1)).save(expected);
     }
 
@@ -93,7 +92,7 @@ class CardServiceTest {
         assertThrows(CardAlreadyExistsException.class, () -> service.create(payload, bearer));
 
         verify(repo, times(1)).existsByNumberHash(hash);
-        verifyNoInteractions(mapper, userClient);
+        verifyNoInteractions(mapper, userService);
         verifyNoMoreInteractions(repo);
     }
 
@@ -106,12 +105,12 @@ class CardServiceTest {
         String hash = DigestUtils.sha256Hex("1234123141231231");
 
         when(repo.existsByNumberHash(hash)).thenReturn(false);
-        doThrow(UserNotFoundException.class).when(userClient).checkIfExists(userId, bearer);
+        doThrow(UserNotFoundException.class).when(userService).get(userId);
 
         assertThrows(UserNotFoundException.class, () -> service.create(payload, bearer));
 
         verify(repo, times(1)).existsByNumberHash(hash);
-        verify(userClient, times(1)).checkIfExists(userId, bearer);
+        verify(userService, times(1)).get(userId);
         verifyNoInteractions(mapper);
         verifyNoMoreInteractions(repo);
     }
@@ -234,15 +233,19 @@ class CardServiceTest {
         int size = 5;
         UUID userId1 = UUID.randomUUID();
         UUID userId2 = UUID.randomUUID();
+        User user1 = User.builder().id(userId1).build();
+        User user2 = User.builder().id(userId2).build();
         PageDto<CardDto> expected = new PageDto<>(List.of(CardDto.builder().userId(userId1).build(),
                 CardDto.builder().userId(userId2).build()), 0, 5, 1, false, false);
         Pageable pageable = PageRequest.of(page, size);
         CardFilter filter = new CardFilter(null, null, null, null, null, null);
-        Page<Card> expectedFound = new PageImpl<>(List.of(Card.builder().userId(userId1).build(),
-                Card.builder().userId(userId2).build()), pageable, 1);
+        UUID card1Id = UUID.randomUUID();
+        UUID card2Id = UUID.randomUUID();
+        Page<Card> expectedFound = new PageImpl<>(List.of(Card.builder().id(card1Id).user(user1).build(),
+                Card.builder().id(card2Id).user(user2).build()), pageable, 1);
 
-        Page<Card> mockFound = new PageImpl<>(List.of(Card.builder().userId(userId1).build(),
-                Card.builder().userId(userId2).build()), pageable, 1);
+        Page<Card> mockFound = new PageImpl<>(List.of(Card.builder().id(card1Id).user(user1).build(),
+                Card.builder().id(card2Id).user(user2).build()), pageable, 1);
         PageDto<CardDto> mockMapped = new PageDto<>(List.of(CardDto.builder().userId(userId1).build(),
                 CardDto.builder().userId(userId2).build()), 0, 5, 1, false, false);
 

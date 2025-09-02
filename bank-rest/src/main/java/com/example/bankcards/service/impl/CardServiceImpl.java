@@ -7,10 +7,11 @@ import com.example.bankcards.core.exception.CardNotFoundException;
 import com.example.bankcards.core.exception.UserDoesNotHavePermission;
 import com.example.bankcards.core.other.CardFilter;
 import com.example.bankcards.entity.Card;
+import com.example.bankcards.entity.User;
 import com.example.bankcards.mapper.CardMapper;
 import com.example.bankcards.repository.CardRepository;
 import com.example.bankcards.service.CardService;
-import com.example.bankcards.service.UserClient;
+import com.example.bankcards.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -29,7 +30,7 @@ import java.util.UUID;
 public class CardServiceImpl implements CardService {
     private final CardRepository repo;
     private final CardMapper mapper;
-    private final UserClient userClient;
+    private final UserService userService;
 
     @Override
     @Transactional
@@ -39,9 +40,9 @@ public class CardServiceImpl implements CardService {
 
         checkConflicts(payload);
 
-        userClient.checkIfExists(payload.userId(), bearer);
+        User user = userService.get(payload.userId());
 
-        Card mapped = mapper.create(payload);
+        Card mapped = mapper.create(payload, user);
 
         Card saved = repo.save(mapped);
 
@@ -136,7 +137,7 @@ public class CardServiceImpl implements CardService {
         Card found = repo.findById(cardId)
                 .orElseThrow(() -> new CardNotFoundException("Card [%s] was not found.".formatted(cardId)));
 
-        if (!found.getUserId().equals(userId))
+        if (!found.getUser().getId().equals(userId))
             throw new UserDoesNotHavePermission("User [%s] does not have permissions to block card that does not belong to him.".formatted(userId));
 
         checkBlockConflicts(found);
@@ -160,6 +161,6 @@ public class CardServiceImpl implements CardService {
             throw new CardAlreadyExistsException("Card [%s] already blocked.".formatted(found.getId()));
 
         if (status.equals(CardStatus.expired))
-            throw new UserDoesNotHavePermission("User [%s] does not have change status to expired card.".formatted(found.getUserId()));
+            throw new UserDoesNotHavePermission("User [%s] does not have change status to expired card.".formatted(found.getUser().getId()));
     }
 }

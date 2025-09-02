@@ -69,7 +69,7 @@ public class TransactionServiceImpl implements TransactionService {
         Card senderCard = cardService.getById(payload.senderCardId());
         Card receiverCard = cardService.getById(payload.receiverCardId());
 
-        if (!senderCard.getUserId().equals(userId))
+        if (!senderCard.getUser().getId().equals(userId))
             throw new UserDoesNotHavePermission("User [%s] does not have permissions to create transaction from other card.".formatted(userId));
 
         Transaction mapped = mapper.create(payload, senderCard, receiverCard);

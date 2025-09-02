@@ -24,14 +24,4 @@ public class RabbitConfiguration {
         template.setMessageConverter(converter);
         return template;
     }
-
-    @Bean
-    public CachingConnectionFactory connectionFactory() {
-        CachingConnectionFactory factory = new CachingConnectionFactory();
-        factory.setHost("rabbit");
-        factory.setPort(5672);
-        factory.setUsername("bankrestusername");
-        factory.setPassword("bankrestpassword");
-        return factory;
-    }
 }

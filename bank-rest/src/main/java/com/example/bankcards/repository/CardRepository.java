@@ -22,7 +22,7 @@ public interface CardRepository extends CrudRepository<Card, UUID> {
         SELECT c FROM Card c
         JOIN c.balance b
         WHERE
-            (:userId IS NULL OR c.userId = :userId) AND
+            (:userId IS NULL OR c.user.id = :userId) AND
             (:status IS NULL OR c.status = :status) AND
             (:expirationDate IS NULL OR c.expirationDate = :expirationDate) AND
             (:amount IS NULL OR b.value = :amount)

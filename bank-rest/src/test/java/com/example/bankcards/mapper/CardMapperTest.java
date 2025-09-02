@@ -6,6 +6,7 @@ import com.example.bankcards.core.dto.card.CardPayload;
 import com.example.bankcards.core.dto.card.CardStatus;
 import com.example.bankcards.core.dto.card.CardUpdatePayload;
 import com.example.bankcards.entity.Card;
+import com.example.bankcards.entity.User;
 import com.example.bankcards.mapper.impl.CardMapperImpl;
 import com.example.bankcards.util.EncryptUtils;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -37,13 +38,14 @@ class CardMapperTest {
     @Test
     void create__ShouldMapPayloadToCardEntity() {
         UUID userId = UUID.randomUUID();
+        User user = User.builder().id(userId).build();
         LocalDate date = LocalDate.now().plusDays(30);
         String hash = DigestUtils.sha256Hex("1234123141231231");
 
         CardPayload payload = new CardPayload(userId, "1234123141231231",
                 date, "visa");
         Card expected = Card.builder()
-                .userId(userId)
+                .user(user)
                 .number("encryptedNumber")
                 .numberHash(hash)
                 .expirationDate(date)
@@ -51,9 +53,9 @@ class CardMapperTest {
 
         when(encryptUtils.encrypt("1234123141231231")).thenReturn("encryptedNumber");
 
-        Card result = mapper.create(payload);
+        Card result = mapper.create(payload, user);
 
-        assertEquals(expected.getUserId(), result.getUserId());
+        assertEquals(expected.getUser().getId(), result.getUser().getId());
         assertEquals(expected.getNumber(), result.getNumber());
         assertEquals(expected.getLast4(), result.getLast4());
         assertEquals(expected.getNumberHash(), result.getNumberHash());
@@ -65,11 +67,13 @@ class CardMapperTest {
 
         UUID cardId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
+        User user = User.builder().id(userId).build();
+
         LocalDate date = LocalDate.now().plusDays(30);
 
         Card entity = Card.builder()
                 .id(cardId)
-                .userId(userId)
+                .user(user)
                 .status(CardStatus.active)
                 .expirationDate(date)
                 .number("encryptedNumber")
@@ -125,6 +129,8 @@ class CardMapperTest {
 
         UUID userId1 = UUID.randomUUID();
         UUID userId2 = UUID.randomUUID();
+        User user1 = User.builder().id(userId1).build();
+        User user2 = User.builder().id(userId2).build();
 
         UUID cardId1 = UUID.randomUUID();
         UUID cardId2 = UUID.randomUUID();
@@ -140,8 +146,8 @@ class CardMapperTest {
         PageDto<CardDto> expected = new PageDto<>(expectedDtos, 0, 5, 1, false, false);
 
 
-        Card card1 = Card.builder().id(cardId1).userId(userId1).last4("1234").status(CardStatus.active).expirationDate(date1).build();
-        Card card2 = Card.builder().id(cardId2).userId(userId2).last4("1234").status(CardStatus.active).expirationDate(date2).build();
+        Card card1 = Card.builder().id(cardId1).user(user1).last4("1234").status(CardStatus.active).expirationDate(date1).build();
+        Card card2 = Card.builder().id(cardId2).user(user2).last4("1234").status(CardStatus.active).expirationDate(date2).build();
 
         List<Card> cards = List.of(card1, card2);
         Page<Card> pageCards = new PageImpl<>(cards, pageable, 2);

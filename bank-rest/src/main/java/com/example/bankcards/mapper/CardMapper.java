@@ -6,10 +6,11 @@ import com.example.bankcards.core.dto.card.CardFullDto;
 import com.example.bankcards.core.dto.card.CardPayload;
 import com.example.bankcards.core.dto.card.CardUpdatePayload;
 import com.example.bankcards.entity.Card;
+import com.example.bankcards.entity.User;
 import org.springframework.data.domain.Page;
 
 public interface CardMapper {
-    Card create(CardPayload payload);
+    Card create(CardPayload payload, User user);
 
     CardDto read(Card card);
 

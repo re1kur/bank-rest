@@ -5,6 +5,7 @@ import com.example.bankcards.core.dto.TransactionDto;
 import com.example.bankcards.core.dto.card.CardDto;
 import com.example.bankcards.core.dto.card.CardFullDto;
 import com.example.bankcards.core.dto.transaction.TransactionPayload;
+import com.example.bankcards.core.dto.user.UserDto;
 import com.example.bankcards.service.ProfileService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -68,6 +69,14 @@ public class ProfileController {
     ) {
         Pageable pageable = PageRequest.of(page, size);
         PageDto<TransactionDto> responseBody = service.readTransactions(jwt.getSubject(), pageable);
+        return ResponseEntity.ok(responseBody);
+    }
+
+    @GetMapping
+    public ResponseEntity<?> getProfile(
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        UserDto responseBody = service.getProfile(jwt.getSubject());
         return ResponseEntity.ok(responseBody);
     }
 }
