@@ -27,12 +27,10 @@ services:
     env_file:
       - build/psql/environment/bank.env
       - build/vault/environment/.env
-      - build/rabbit/environment/.env
       - bank-rest/build/environment/.env
     ports:
       - "8080:8080"
     depends_on:
-      - rabbit
       - psql-bank
       - vault
     networks:
