@@ -5,6 +5,7 @@ import com.example.bankcards.core.dto.TransactionDto;
 import com.example.bankcards.core.dto.transaction.TransactionPayload;
 import com.example.bankcards.core.other.TransactionFilter;
 import com.example.bankcards.service.TransactionService;
+import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -40,7 +41,7 @@ public class TransactionsController {
     public ResponseEntity<?> readTransactions(
             @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
             @RequestParam(name = "size", required = false, defaultValue = "5") Integer size,
-            @ModelAttribute TransactionFilter filter
+            @ModelAttribute @Nullable TransactionFilter filter
     ) {
         Pageable pageable = PageRequest.of(page, size);
         PageDto<TransactionDto> responseBody = service.readAll(pageable, filter);

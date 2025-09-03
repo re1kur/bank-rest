@@ -9,7 +9,6 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>authz-rest</module>
         <module>bank-rest</module>
     </modules>
 

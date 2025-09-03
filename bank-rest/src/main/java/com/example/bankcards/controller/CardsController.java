@@ -6,6 +6,7 @@ import com.example.bankcards.core.dto.card.CardPayload;
 import com.example.bankcards.core.dto.card.CardUpdatePayload;
 import com.example.bankcards.core.other.CardFilter;
 import com.example.bankcards.service.CardService;
+import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -61,7 +62,7 @@ public class CardsController {
     public ResponseEntity<?> getCards(
             @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
             @RequestParam(name = "size", required = false, defaultValue = "5") Integer size,
-            @ModelAttribute CardFilter filter
+            @ModelAttribute @Nullable CardFilter filter
     ) {
         Pageable pageable = PageRequest.of(page, size);
         PageDto<CardDto> responseBody = service.readAll(pageable, filter);

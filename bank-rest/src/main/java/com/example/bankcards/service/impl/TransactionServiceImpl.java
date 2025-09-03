@@ -15,7 +15,7 @@ import com.example.bankcards.mapper.TransactionMapper;
 import com.example.bankcards.repository.TransactionRepository;
 import com.example.bankcards.service.CardService;
 import com.example.bankcards.service.TransactionService;
-import com.example.bankcards.mq.EventPublisher;
+import com.example.bankcards.outbox.OutboxService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -34,7 +34,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionMapper mapper;
     private final TransactionRepository repo;
     private final CardService cardService;
-    private final EventPublisher eventPublisher;
+    private final OutboxService outboxService;
 
     @Override
     @Transactional
@@ -49,7 +49,7 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction saved = repo.save(mapped);
         UUID transactionId = saved.getId();
 
-        eventPublisher.publishTransaction(transactionId);
+        outboxService.createTransactionEvent(transactionId);
 
         log.info("TRANSACTION CREATED: [{}]", transactionId);
         return transactionId;

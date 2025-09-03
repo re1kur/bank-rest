@@ -1,4 +1,8 @@
 services:
+  redis:
+    image: redis:8-alpine3.21
+    ports:
+      - "6379:6379"
   psql:
     image: postgres:17-alpine
     environment:
@@ -18,16 +22,6 @@ services:
     cap_add:
       - IPC_LOCK
     entrypoint: ["sh", "/entrypoint.sh"]
-  rabbit:
-    build:
-      context: .
-      dockerfile: build/rabbit/Dockerfile
-    env_file: build/rabbit/environment/.env
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
 
 volumes:
   rabbitmq_data:

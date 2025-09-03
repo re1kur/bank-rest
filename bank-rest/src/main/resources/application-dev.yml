@@ -17,11 +17,6 @@ spring:
     token: root
   authz:
     uri: http://localhost:8080/api/v1/users
-  rabbitmq:
-    host: localhost
-    virtual-host: /
-    username: developer
-    password: developer
 
 vault:
   port: 8200

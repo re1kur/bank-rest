@@ -250,7 +250,7 @@ paths:
             default: 5
         - name: filter
           in: query
-          required: true
+          required: false
           schema:
             $ref: "#/components/schemas/CardFilter"
       responses:

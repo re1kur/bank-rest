@@ -4,7 +4,10 @@ spring:
     name: bank-rest
   liquibase:
     change-log: db/migration/db.changelog-master.yml
-
+  custom:
+    outbox:
+      type:
+        transaction: transaction_event
 server:
   port: 8080
 
@@ -12,10 +15,3 @@ vault:
   key:
     api:
       path: my-encryption-key
-mq:
-  exchange:
-    transaction: transaction.exchange
-  routing-key:
-    transaction: transaction.created
-  queue:
-    transaction: transaction.created.queue

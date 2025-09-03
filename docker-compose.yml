@@ -20,16 +20,6 @@ services:
     entrypoint: [ "sh", "/entrypoint.sh" ]
     networks:
       - bank-rest
-  rabbit:
-    container_name: rabbit
-    build:
-      context: .
-      dockerfile: build/rabbit/Dockerfile
-    env_file: build/rabbit/environment/.env
-    ports:
-      - "15672:15672"
-    networks:
-      - bank-rest
   bank-rest:
     build:
       context: .
